@@ -164,6 +164,21 @@ async function runSearchStep(
     options
   );
 
+  if (execution.selectedUrls.length) {
+    await appendTurnEvent(
+      {
+        type: "source_selected",
+        inquiryId: state.inquiryId,
+        turnId: state.turnId,
+        cycle: execution.batch.cycle,
+        actionId: action.id,
+        urls: execution.selectedUrls,
+        timestamp: new Date().toISOString()
+      },
+      options
+    );
+  }
+
   const nextSources = execution.sources.map((source) => source.summary);
   state.budgets.sourcesRead += nextSources.length;
   state.sourceLedger.push(...nextSources);

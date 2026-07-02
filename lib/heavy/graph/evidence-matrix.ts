@@ -14,17 +14,37 @@ export function buildEvidenceMatrix(frame: ResearchFrame, candidates: Candidate[
 }
 
 export function hardConstraintsEnough(candidate: Candidate, frame: ResearchFrame, matrix: EvidenceMatrix): boolean {
+  if (candidate.status === "rejected") {
+    return false;
+  }
   if (hasBlockingExclusion(candidate.id, frame, matrix)) {
     return false;
   }
 
-  return frame.hardConstraints.every((constraint) => {
-    const cell = findCell(matrix, candidate.id, constraint.id);
-    if (!cell) {
-      return false;
-    }
-    return cell.status === "direct" || (frame.evidencePolicy.proxyEvidenceAllowed && cell.status === "proxy");
-  });
+  const hardCells = frame.hardConstraints.map((constraint) => ({
+    constraint,
+    cell: findCell(matrix, candidate.id, constraint.id)
+  }));
+  if (hardCells.some(({ cell }) => cell?.status === "contradicted" || cell?.status === "excluded")) {
+    return false;
+  }
+
+  const coreSatisfied = hardCells
+    .filter(({ constraint }) => constraint.core)
+    .every(({ cell }) => cell && isSatisfiedCell(cell, frame));
+  if (!coreSatisfied) {
+    return false;
+  }
+
+  const nonCoreMissing = hardCells
+    .filter(({ constraint }) => !constraint.core)
+    .filter(({ cell }) => !cell || !isSatisfiedCell(cell, frame)).length;
+
+  return nonCoreMissing <= 1;
+}
+
+function isSatisfiedCell(cell: EvidenceMatrixCell, frame: ResearchFrame): boolean {
+  return cell.status === "direct" || (frame.evidencePolicy.proxyEvidenceAllowed && cell.status === "proxy");
 }
 
 export function findMatrixCell(matrix: EvidenceMatrix, candidateId: string, constraintId: string): EvidenceMatrixCell | undefined {

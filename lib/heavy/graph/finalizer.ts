@@ -9,6 +9,23 @@ export function finalizeGraphReport(state: ResearchState): FinalReport {
   const unknowns = state.evaluatorDecisions.flatMap((decision) => decision.unresolvedQuestions).filter(unique);
 
   if (!top) {
+    if (state.evidenceItems.length > 0 && isWorkflowLikeTask(state.frame.taskKind)) {
+      const evidenceLines = state.evidenceItems.map((item) => `- ${item.claim} [来源](${item.sourceUrl})`).join("\n");
+      const constraintLines = state.frame.hardConstraints
+        .map((constraint) => {
+          const count = state.evidenceItems.filter((item) => item.constraintIds.includes(constraint.id)).length;
+          return `| ${constraint.label} | ${count > 0 ? "supported/proxy" : "unknown"} | ${count} |`;
+        })
+        .join("\n");
+      const sourceUrls = state.evidenceItems.map((item) => item.sourceUrl).filter(unique);
+      return {
+        markdown: `# 一句话结论\n\n最大可能路径是围绕 **${state.frame.deliverable}** 执行，而不是把当前证据硬凑成单一候选；现有证据支持先按 workflow / 路径推进，并把未知项显式留出。\n\n# 最大可能答案 / 候选排名\n\n1. ${state.frame.deliverable}\n\n# 证据矩阵\n\n| 条件 | 状态 | 证据数 |\n|---|---|---:|\n${constraintLines}\n\n# 直接证据\n\n${formatEvidence(state.evidenceItems.filter((item) => item.strength === "direct"))}\n\n# 代理证据\n\n${formatEvidence(state.evidenceItems.filter((item) => item.strength === "proxy" || item.strength === "weak"))}\n\n# 排除项和被拒路径\n\n${state.rejectedPaths.map((path) => `- ${path.title}: ${path.reason}`).join("\n") || "- 暂无明确被拒路径"}\n\n# 未确认项\n\n${unknowns.map((item) => `- ${item}`).join("\n") || "- 仍需对关键边界做外部验证"}\n\n# 下一步建议\n\n- 按上述 workflow 先跑小样本，验证每个 gate 的输入、输出和不可推断边界。\n- 对 EOL/HTF、交易资格或 DNS 支持这类外部状态，用官方文档、平台规则或人工抽样二次确认。\n\n# 来源\n\n${sourceUrls.map((url) => `- ${url}`).join("\n")}`,
+        summary: `最大可能路径：${state.frame.deliverable}`,
+        sourceUrls,
+        unknowns,
+        completedAt: new Date().toISOString()
+      };
+    }
     return {
       markdown: `# 一句话结论\n\n没有找到足够公开证据形成候选。\n\n# 未确认项\n\n${unknowns.map((item) => `- ${item}`).join("\n") || "- 缺少可用来源"}`,
       summary: "证据不足",
@@ -36,6 +53,10 @@ export function finalizeGraphReport(state: ResearchState): FinalReport {
 
 function formatEvidence(items: ResearchState["evidenceItems"]): string {
   return items.map((item) => `- ${item.claim} [来源](${item.sourceUrl})`).join("\n") || "- 暂无";
+}
+
+function isWorkflowLikeTask(taskKind: ResearchState["frame"]["taskKind"]): boolean {
+  return taskKind === "data_workflow_design" || taskKind === "sales_strategy" || taskKind === "market_list_building" || taskKind === "technical_verification";
 }
 
 function unique<T>(value: T, index: number, array: T[]): boolean {

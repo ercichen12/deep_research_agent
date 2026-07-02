@@ -61,6 +61,7 @@ describe("Graph Heavy orchestrator", () => {
         "cycle_started",
         "actions_planned",
         "search_batch_reported",
+        "source_selected",
         "source_read",
         "candidate_promoted",
         "state_evaluated",

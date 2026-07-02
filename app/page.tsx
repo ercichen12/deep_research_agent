@@ -3,7 +3,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useEffect, useMemo, useState } from "react";
-import type { GraphStateSummary } from "@/lib/heavy/graph/types";
+import type { GraphStateSummary, SearchBatchArtifact, SourceArtifact } from "@/lib/heavy/graph/types";
 import type { HeavyEvent, Inquiry, ResearchRun, Turn } from "@/lib/heavy/types";
 
 const SAMPLE_PROMPT =
@@ -18,6 +18,12 @@ type HealthState =
       searchProvider: { provider?: string; relayConfigured?: boolean; openCliFallback?: boolean; webFallback?: boolean };
     }
   | { status: "error"; message: string; searchProvider?: { provider?: string; relayConfigured?: boolean } };
+
+type ArtifactLoadState<T> =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "ready"; data: T }
+  | { status: "error"; message: string };
 
 export default function Home() {
   const [prompt, setPrompt] = useState(SAMPLE_PROMPT);
@@ -190,7 +196,7 @@ export default function Home() {
         </header>
 
         <StageBar turn={activeTurn} events={events} />
-        {activeInquiry?.graphState ? <GraphStatePanel graphState={activeInquiry.graphState} /> : null}
+        {activeInquiry?.graphState ? <GraphStatePanel graphState={activeInquiry.graphState} inquiryId={activeInquiry.id} /> : null}
 
         <div className="content-grid">
           <section className="workstream">
@@ -320,7 +326,52 @@ function EventCard({ event }: { event: HeavyEvent }) {
   );
 }
 
-function GraphStatePanel({ graphState }: { graphState: GraphStateSummary }) {
+function GraphStatePanel({ graphState, inquiryId }: { graphState: GraphStateSummary; inquiryId: string }) {
+  const [searchArtifacts, setSearchArtifacts] = useState<Record<string, ArtifactLoadState<SearchBatchArtifact>>>({});
+  const [sourceArtifacts, setSourceArtifacts] = useState<Record<string, ArtifactLoadState<SourceArtifact>>>({});
+
+  async function loadSearchArtifact(batchId: string) {
+    const existing = searchArtifacts[batchId];
+    if (existing?.status === "loading" || existing?.status === "ready") {
+      return;
+    }
+    setSearchArtifacts((current) => ({ ...current, [batchId]: { status: "loading" } }));
+    try {
+      const response = await fetch(`/api/inquiries/${inquiryId}/artifacts/search-batches/${batchId}`, { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message ?? "搜索 artifact 加载失败");
+      }
+      setSearchArtifacts((current) => ({ ...current, [batchId]: { status: "ready", data: data as SearchBatchArtifact } }));
+    } catch (caught) {
+      setSearchArtifacts((current) => ({
+        ...current,
+        [batchId]: { status: "error", message: caught instanceof Error ? caught.message : "搜索 artifact 加载失败" }
+      }));
+    }
+  }
+
+  async function loadSourceArtifact(sourceHash: string) {
+    const existing = sourceArtifacts[sourceHash];
+    if (existing?.status === "loading" || existing?.status === "ready") {
+      return;
+    }
+    setSourceArtifacts((current) => ({ ...current, [sourceHash]: { status: "loading" } }));
+    try {
+      const response = await fetch(`/api/inquiries/${inquiryId}/artifacts/sources/${sourceHash}`, { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message ?? "网页 artifact 加载失败");
+      }
+      setSourceArtifacts((current) => ({ ...current, [sourceHash]: { status: "ready", data: data as SourceArtifact } }));
+    } catch (caught) {
+      setSourceArtifacts((current) => ({
+        ...current,
+        [sourceHash]: { status: "error", message: caught instanceof Error ? caught.message : "网页 artifact 加载失败" }
+      }));
+    }
+  }
+
   return (
     <section className="graph-panel">
       <div className="section-head">
@@ -352,6 +403,10 @@ function GraphStatePanel({ graphState }: { graphState: GraphStateSummary }) {
                   {formatSearchProvider(call.provider, call.engine)} · {call.status} · {call.resultCount} results · {call.query}
                 </small>
               ))}
+              <button type="button" className="ghost-button compact" onClick={() => void loadSearchArtifact(batch.id)}>
+                展开搜索结果
+              </button>
+              <SearchArtifactPanel state={searchArtifacts[batch.id] ?? { status: "idle" }} />
             </article>
           ))}
           {graphState.recentSearchBatches.length === 0 ? <p className="muted">暂无搜索批次。</p> : null}
@@ -370,6 +425,10 @@ function GraphStatePanel({ graphState }: { graphState: GraphStateSummary }) {
                 {source.status}
                 {typeof source.readCharCount === "number" ? ` · ${source.readCharCount} chars` : ""}
               </small>
+              <button type="button" className="ghost-button compact" onClick={() => void loadSourceArtifact(source.sourceHash)}>
+                查看网页内容
+              </button>
+              <SourceArtifactPanel state={sourceArtifacts[source.sourceHash] ?? { status: "idle" }} />
             </article>
           ))}
           {graphState.recentSources.length === 0 ? <p className="muted">暂无网页来源。</p> : null}
@@ -435,6 +494,83 @@ function GraphStatePanel({ graphState }: { graphState: GraphStateSummary }) {
         </section>
       </div>
     </section>
+  );
+}
+
+function SearchArtifactPanel({ state }: { state: ArtifactLoadState<SearchBatchArtifact> }) {
+  if (state.status === "idle") {
+    return null;
+  }
+  if (state.status === "loading") {
+    return <p className="muted artifact-state">正在加载搜索结果...</p>;
+  }
+  if (state.status === "error") {
+    return <p className="error artifact-state">{state.message}</p>;
+  }
+
+  return (
+    <div className="artifact-detail">
+      <h4>Provider Results</h4>
+      {state.data.providerCalls.map((call, index) => (
+        <article key={`${state.data.id}-call-${index}`}>
+          <strong>{formatSearchProvider(call.provider, call.engine)}</strong>
+          <small>
+            {formatSearchProvider(call.provider, call.engine)} · {call.status} · {call.results.length} results
+          </small>
+          <code>{call.query}</code>
+          {call.message ? <small>{call.message}</small> : null}
+          <ol>
+            {call.results.map((result) => (
+              <li key={`${call.provider}-${call.engine ?? "default"}-${result.url}`}>
+                <a href={result.url} rel="noreferrer" target="_blank">
+                  {result.title}
+                </a>
+                {result.snippet ? <small>{result.snippet}</small> : null}
+              </li>
+            ))}
+          </ol>
+        </article>
+      ))}
+      <h4>Deduped Results</h4>
+      <ol>
+        {state.data.dedupedResults.map((result) => (
+          <li key={result.url}>
+            <a href={result.url} rel="noreferrer" target="_blank">
+              {result.title}
+            </a>
+            {result.snippet ? <small>{result.snippet}</small> : null}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+function SourceArtifactPanel({ state }: { state: ArtifactLoadState<SourceArtifact> }) {
+  if (state.status === "idle") {
+    return null;
+  }
+  if (state.status === "loading") {
+    return <p className="muted artifact-state">正在加载网页内容...</p>;
+  }
+  if (state.status === "error") {
+    return <p className="error artifact-state">{state.message}</p>;
+  }
+
+  return (
+    <div className="artifact-detail">
+      <h4>Read Attempts</h4>
+      {(state.data.readLogs ?? []).map((log, index) => (
+        <small key={`${state.data.sourceHash}-read-${index}`}>
+          {log.provider} · {log.status}
+          {typeof log.readCharCount === "number" ? ` · ${log.readCharCount} chars` : ""}
+          {log.message ? ` · ${log.message}` : ""}
+        </small>
+      ))}
+      {(state.data.readLogs ?? []).length === 0 ? <small>暂无读取尝试日志。</small> : null}
+      <h4>Excerpt</h4>
+      <p>{state.data.excerpt ?? "这个网页 artifact 没有可展示正文片段。"}</p>
+    </div>
   );
 }
 

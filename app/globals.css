@@ -123,6 +123,15 @@ button {
   padding: 0 12px;
 }
 
+.ghost-button.compact {
+  align-self: start;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  min-height: 30px;
+  padding: 0 10px;
+}
+
 .section-head {
   align-items: center;
   display: flex;
@@ -335,6 +344,50 @@ button {
 .graph-card a {
   color: var(--accent);
   font-size: 12px;
+}
+
+.artifact-state {
+  font-size: 12px;
+}
+
+.artifact-detail {
+  background: #f3f7fc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+  max-height: 420px;
+  overflow: auto;
+  padding: 9px;
+}
+
+.artifact-detail h4 {
+  font-size: 12px;
+  margin: 0;
+}
+
+.artifact-detail article,
+.artifact-detail ol {
+  display: grid;
+  gap: 6px;
+}
+
+.artifact-detail ol {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.artifact-detail li {
+  display: grid;
+  gap: 3px;
+}
+
+.artifact-detail code {
+  color: var(--accent);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .matrix-table {

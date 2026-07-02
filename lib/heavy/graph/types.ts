@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { FinalReport, HeavySearchEngine, HeavySearchProviderName, HeavySearchResult } from "@/lib/heavy/types";
+import type { FinalReport, HeavySearchEngine, HeavySearchProviderName, HeavySearchResult, ReadAttemptLog } from "@/lib/heavy/types";
 
 export type TaskKind =
   | "find_person_company"
@@ -105,6 +105,7 @@ export type SourceArtifact = {
   readCharCount?: number;
   fullText?: string;
   excerpt?: string;
+  readLogs?: ReadAttemptLog[];
   createdAt: string;
 };
 

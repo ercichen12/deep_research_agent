@@ -209,6 +209,150 @@ describe("Heavy console UI", () => {
     expect(screen.getAllByText("direct").length).toBeGreaterThanOrEqual(1);
   });
 
+  it("expands graph search and source artifacts from the ledger", async () => {
+    const inquiry = fixtureInquiry();
+    inquiry.graphState = {
+      frame: {
+        taskKind: "technical_verification",
+        userGoal: inquiry.prompt,
+        deliverable: "Cloudflare feasibility",
+        hardConstraints: [{ id: "ns_delegation", label: "authoritative NS delegation", kind: "hard", core: true }],
+        softPreferences: [],
+        exclusionRules: []
+      },
+      status: "completed",
+      cycleIndex: 1,
+      actionCount: 1,
+      searchBatchCount: 1,
+      sourceCount: 1,
+      evidenceCount: 1,
+      candidates: [],
+      evidenceMatrix: { constraintIds: ["ns_delegation"], candidateIds: [], cells: [] },
+      rejectedPaths: [],
+      evaluatorDecisions: [],
+      recentSearchBatches: [
+        {
+          id: "batch_artifact",
+          actionId: "act_1",
+          cycle: 1,
+          queryCount: 1,
+          providerCalls: [
+            {
+              provider: "opencli",
+              engine: "google",
+              query: "Cloudflare free subdomain NS delegation",
+              status: "done",
+              resultCount: 30,
+              durationMs: 42,
+              artifactId: "batch_artifact_call_1"
+            }
+          ],
+          dedupedResultCount: 30,
+          uniqueDomainCount: 12,
+          expectedSignalHits: ["NS delegation"],
+          officialOrPrimaryCount: 2,
+          candidateMentions: [],
+          quality: "strong"
+        }
+      ],
+      recentSources: [
+        {
+          sourceHash: "source_artifact",
+          title: "Cloudflare Docs",
+          url: "https://developers.cloudflare.com/dns/zone-setups/subdomain-setup/",
+          provider: "opencli",
+          engine: "google",
+          status: "read",
+          readCharCount: 9000,
+          evidenceIds: ["ev_1"]
+        }
+      ],
+      updatedAt: "2026-07-02T00:00:00.000Z"
+    };
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes("/api/health")) {
+          return jsonResponse({ ok: true, configuredModel: "test-model", baseUrl: "https://relay.example", searchProvider: { provider: "relay" } });
+        }
+        if (url.includes(`/api/inquiries/${inquiry.id}/artifacts/search-batches/batch_artifact`)) {
+          return jsonResponse({
+            id: "batch_artifact",
+            inquiryId: inquiry.id,
+            turnId: inquiry.turns[0].id,
+            actionId: "act_1",
+            cycle: 1,
+            queries: ["Cloudflare free subdomain NS delegation"],
+            providerCalls: [
+              {
+                provider: "opencli",
+                engine: "google",
+                query: "Cloudflare free subdomain NS delegation",
+                status: "done",
+                durationMs: 42,
+                results: [
+                  {
+                    title: "Cloudflare Subdomain Setup",
+                    url: "https://developers.cloudflare.com/dns/zone-setups/subdomain-setup/",
+                    snippet: "Delegate authoritative nameservers for subdomain setup.",
+                    provider: "opencli",
+                    engine: "google"
+                  }
+                ]
+              }
+            ],
+            dedupedResults: [
+              {
+                title: "Cloudflare Subdomain Setup",
+                url: "https://developers.cloudflare.com/dns/zone-setups/subdomain-setup/",
+                snippet: "Delegate authoritative nameservers for subdomain setup.",
+                provider: "opencli",
+                engine: "google"
+              }
+            ],
+            createdAt: "2026-07-02T00:00:00.000Z"
+          });
+        }
+        if (url.includes(`/api/inquiries/${inquiry.id}/artifacts/sources/source_artifact`)) {
+          return jsonResponse({
+            sourceHash: "source_artifact",
+            inquiryId: inquiry.id,
+            turnId: inquiry.turns[0].id,
+            title: "Cloudflare Docs",
+            url: "https://developers.cloudflare.com/dns/zone-setups/subdomain-setup/",
+            provider: "opencli",
+            engine: "google",
+            status: "read",
+            readCharCount: 9000,
+            excerpt: "Cloudflare subdomain setup requires authoritative NS delegation for the subdomain.",
+            readLogs: [
+              { provider: "opencli", status: "error", title: "Cloudflare Docs", url: "https://developers.cloudflare.com/dns/zone-setups/subdomain-setup/", message: "OpenCLI read failed", timestamp: "2026-07-02T00:00:00.000Z" },
+              { provider: "fetch", status: "done", title: "Cloudflare Docs", url: "https://developers.cloudflare.com/dns/zone-setups/subdomain-setup/", readCharCount: 9000, timestamp: "2026-07-02T00:00:01.000Z" }
+            ],
+            createdAt: "2026-07-02T00:00:00.000Z"
+          });
+        }
+        if (url.includes(`/api/inquiries/${inquiry.id}`)) {
+          return jsonResponse(inquiry);
+        }
+        return jsonResponse({ inquiries: [inquiry] });
+      })
+    );
+
+    render(<Home />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "展开搜索结果" }));
+    expect((await screen.findAllByText("Cloudflare Subdomain Setup")).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("opencli · google · done · 1 results")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "查看网页内容" }));
+    expect(await screen.findByText(/requires authoritative NS delegation/)).toBeInTheDocument();
+    expect(screen.getByText(/opencli · error/)).toBeInTheDocument();
+    expect(screen.getByText(/fetch · done · 9000 chars/)).toBeInTheDocument();
+  });
+
   it("renders duplicate research process queries without React key warnings", async () => {
     const inquiry = fixtureInquiry();
     const duplicateStep = inquiry.turns[0].runs[0].agentReports[0].researchSteps[1];

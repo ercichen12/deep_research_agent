@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { saveSearchBatchArtifact, saveSourceArtifact, type HeavyStorageOptions } from "@/lib/heavy/storage";
 import type { HeavySearchProvider, HeavySearchResult, HeavySource, SearchAttemptLog } from "@/lib/heavy/types";
 import { summarizeSearchBatch } from "@/lib/heavy/graph/source-classification";
+import { selectSourcesForRead } from "@/lib/heavy/graph/source-selector";
 import type {
   ResearchState,
   SearchBatchArtifact,
@@ -14,6 +15,7 @@ import type {
 export type GraphSearchExecution = {
   batch: SearchBatchSummary;
   artifact: SearchBatchArtifact;
+  selectedUrls: string[];
   sources: Array<{ summary: SourceSummary; artifact: SourceArtifact; fullText: string; snippet: string }>;
 };
 
@@ -33,14 +35,7 @@ export async function executeSearchAction(input: {
     if (logs.length) {
       providerCalls.push(...logs.map(toProviderCall));
     } else {
-      providerCalls.push({
-        provider: "web",
-        engine: "bing",
-        query,
-        status: results.length ? "done" : "empty",
-        durationMs: 0,
-        results
-      });
+      providerCalls.push(...providerCallsFromResults(query, results));
     }
   }
 
@@ -68,10 +63,19 @@ export async function executeSearchAction(input: {
     candidateAliases: input.state.candidatePool.flatMap((candidate) => [candidate.name, ...candidate.aliases])
   });
 
-  const selectedResults = dedupedResults.slice(0, input.state.budgets.maxSourcesToReadPerCycle);
+  const candidateAliases = input.state.candidatePool.flatMap((candidate) => [candidate.name, ...candidate.aliases]);
+  const remainingTotalReads = Math.max(0, input.state.budgets.maxTotalSourcesToRead - input.state.budgets.sourcesRead);
+  const readLimit = Math.min(input.state.budgets.maxSourcesToReadPerCycle, remainingTotalReads);
+  const selectedResults = selectSourcesForRead({
+    results: dedupedResults,
+    expectedSignals: input.action.expectedSignals,
+    candidateAliases,
+    limit: readLimit
+  });
   const sources = [];
   for (const result of selectedResults) {
     const read = await input.provider.read(result).catch(() => null);
+    const readLogs = input.provider.drainReadLogs?.() ?? [];
     const source = read ?? fallbackSource(result);
     const fullText = source.fullText ?? source.snippet ?? result.snippet ?? "";
     const sourceHash = sourceHashFor(source.url);
@@ -86,6 +90,7 @@ export async function executeSearchAction(input: {
       status: fullText ? "read" : "snippet_only",
       readCharCount: source.readCharCount ?? fullText.length,
       fullText,
+      ...(readLogs.length ? { readLogs } : {}),
       createdAt: new Date().toISOString()
     };
     await saveSourceArtifact(artifact, input.storage);
@@ -106,9 +111,7 @@ export async function executeSearchAction(input: {
     });
   }
 
-  input.provider.drainReadLogs?.();
-
-  return { batch, artifact, sources };
+  return { batch, artifact, selectedUrls: selectedResults.map((result) => result.url), sources };
 }
 
 function toProviderCall(log: SearchAttemptLog): SearchBatchArtifact["providerCalls"][number] {
@@ -121,6 +124,41 @@ function toProviderCall(log: SearchAttemptLog): SearchBatchArtifact["providerCal
     results: log.results,
     ...(log.message ? { message: log.message } : {})
   };
+}
+
+function providerCallsFromResults(query: string, results: HeavySearchResult[]): SearchBatchArtifact["providerCalls"] {
+  if (!results.length) {
+    return [
+      {
+        provider: "web",
+        engine: "bing",
+        query,
+        status: "empty",
+        durationMs: 0,
+        results: []
+      }
+    ];
+  }
+
+  const groups = new Map<string, HeavySearchResult[]>();
+  for (const result of results) {
+    const provider = result.provider === "relay" || result.provider === "opencli" || result.provider === "web" ? result.provider : "web";
+    const engine = result.engine ? String(result.engine) : provider === "relay" ? "relay" : provider === "web" ? "bing" : undefined;
+    const key = `${provider}:${engine ?? ""}`;
+    groups.set(key, [...(groups.get(key) ?? []), result]);
+  }
+
+  return [...groups.entries()].map(([key, groupedResults]) => {
+    const [provider, engine] = key.split(":");
+    return {
+      provider: provider === "relay" || provider === "opencli" ? provider : "web",
+      ...(engine ? { engine } : {}),
+      query,
+      status: groupedResults.length ? "done" : "empty",
+      durationMs: 0,
+      results: groupedResults
+    };
+  });
 }
 
 function fallbackSource(result: HeavySearchResult): HeavySource {

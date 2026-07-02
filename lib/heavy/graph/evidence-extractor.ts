@@ -24,11 +24,11 @@ export function extractEvidence(input: {
   for (const source of input.sources) {
     const text = `${source.summary.title} ${source.snippet} ${source.fullText}`;
     const lower = text.toLowerCase();
-    const candidate = detectCandidate(text);
+    const candidate = detectCandidate(text, input.frame.taskKind);
     if (candidate) {
       candidates.push({
         id: candidate.id,
-        kind: "person_company",
+        kind: candidate.kind,
         name: candidate.name,
         aliases: candidate.aliases,
         summary: "Candidate discovered from public search/read sources.",
@@ -112,6 +112,65 @@ export function extractEvidence(input: {
         evidenceIds: []
       });
     }
+
+    if (input.frame.taskKind === "technical_verification") {
+      const technicalCandidate =
+        candidate ??
+        ({
+          id: "cand_service_cloudflare_delegated_subdomain_path",
+          kind: "service" as const,
+          name: "Cloudflare-compatible delegated subdomain path",
+          aliases: ["Cloudflare DNS", "Public Suffix List", "NS delegation"]
+        });
+      if (!candidate) {
+        candidates.push({
+          id: technicalCandidate.id,
+          kind: technicalCandidate.kind,
+          name: technicalCandidate.name,
+          aliases: technicalCandidate.aliases,
+          summary: "A feasibility path based on Cloudflare zone support, PSL boundary, and authoritative NS delegation.",
+          status: "active"
+        });
+      }
+      const technicalSubjectIds = [technicalCandidate.id];
+      if (/cloudflare|zone setup|dns/i.test(text)) {
+        evidenceItems.push({
+          ...base,
+          claim: "Cloudflare DNS support is a required part of the feasibility path.",
+          subjectIds: technicalSubjectIds,
+          constraintIds: matchingConstraintIds(input.frame, ["cloudflare_support"]),
+          paraphrase: "Source text discusses Cloudflare DNS or zone setup support.",
+          strength: sourceType === "official" ? "direct" : "proxy"
+        });
+      }
+      if (/public suffix list|registrable|etld|private domain/i.test(text)) {
+        evidenceItems.push({
+          ...base,
+          claim: "Public Suffix List or registrable-boundary status affects whether a hostname can behave like a zone.",
+          subjectIds: technicalSubjectIds,
+          constraintIds: matchingConstraintIds(input.frame, ["public_suffix_list"]),
+          paraphrase: "Source text links PSL or registrable boundary to subdomain feasibility.",
+          strength: "direct"
+        });
+      }
+      if (/authoritative|nameserver|name server|\bns\b|delegation|delegated/i.test(text)) {
+        evidenceItems.push({
+          ...base,
+          claim: "Authoritative NS delegation is required or relevant for Cloudflare subdomain setup.",
+          subjectIds: technicalSubjectIds,
+          constraintIds: matchingConstraintIds(input.frame, ["ns_delegation"]),
+          paraphrase: "Source text discusses delegated authoritative nameservers.",
+          strength: "direct"
+        });
+      }
+      if (/cname only|cannot delegate|no nameserver|without nameserver/i.test(text)) {
+        rejectedPaths.push({
+          title: source.summary.title,
+          reason: "Source suggests a CNAME-only or non-delegated hostname path, which is likely not enough for Cloudflare zone control.",
+          evidenceIds: []
+        });
+      }
+    }
   }
 
   return normalizeEvidenceExtractionOutput({
@@ -122,12 +181,24 @@ export function extractEvidence(input: {
   });
 }
 
-function detectCandidate(text: string): { id: string; name: string; aliases: string[] } | null {
+function detectCandidate(
+  text: string,
+  taskKind: ResearchFrame["taskKind"]
+): { id: string; kind: "person_company" | "website" | "company" | "service" | "workflow" | "channel" | "other"; name: string; aliases: string[] } | null {
   if (/grace brown/i.test(text) && /andromeda/i.test(text)) {
     return {
       id: "cand_person_company_grace_brown_andromeda_robotics",
+      kind: "person_company",
       name: "Grace Brown / Andromeda Robotics",
       aliases: ["Grace Brown", "Andromeda Robotics"]
+    };
+  }
+  if (taskKind === "technical_verification" && /cloudflare/i.test(text) && /public suffix list|nameserver|delegation/i.test(text)) {
+    return {
+      id: "cand_service_cloudflare_delegated_subdomain_path",
+      kind: "service",
+      name: "Cloudflare-compatible delegated subdomain path",
+      aliases: ["Cloudflare DNS", "Public Suffix List", "NS delegation"]
     };
   }
   return null;
