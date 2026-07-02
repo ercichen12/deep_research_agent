@@ -15,19 +15,21 @@ describe("QA regression: event replay for selected inquiries", () => {
   it("replays NDJSON events when a running inquiry is loaded from the local list", async () => {
     const inquiry = runningInquiry();
     const streamEvent = {
-      type: "action_started",
+      type: "workflow_artifact_reported",
       inquiryId: inquiry.id,
       turnId: inquiry.turns[0].id,
       cycle: 1,
-      action: {
-        id: "act_1_search_web",
-        type: "search_web",
-        purpose: "initial search",
-        rationale: "show visible progress after reload",
-        priority: "high",
-        queries: ["OpenAI current CEO official website"],
-        expectedSignals: ["official website"],
-        maxResults: 30
+      artifact: {
+        id: "workflow_replay_draft",
+        cycle: 1,
+        stage: "draft",
+        title: "Draft workflow from current evidence",
+        summary: "Initial workflow draft is visible after reload.",
+        findings: ["Search and source evidence produced a draft."],
+        invalidAssumptions: [],
+        orderedGates: ["Gate 1: verify official website"],
+        sourceUrls: ["https://example.com/source"],
+        createdAt: "2026-07-02T00:00:00.200Z"
       },
       timestamp: "2026-07-02T00:00:00.200Z"
     };
@@ -51,8 +53,11 @@ describe("QA regression: event replay for selected inquiries", () => {
 
     render(<Home />);
 
-    expect(await screen.findByText("action_started")).toBeInTheDocument();
+    expect(await screen.findByText("workflow_artifact_reported")).toBeInTheDocument();
     expect(screen.getByText("2026-07-02T00:00:00.200Z")).toBeInTheDocument();
+    expect(screen.getByText("draft")).toBeInTheDocument();
+    expect(screen.getByText("Draft workflow from current evidence")).toBeInTheDocument();
+    expect(screen.getByText("Initial workflow draft is visible after reload.")).toBeInTheDocument();
   });
 });
 

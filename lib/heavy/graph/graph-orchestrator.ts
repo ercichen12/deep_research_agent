@@ -26,7 +26,8 @@ import {
   type GraphBudgetState,
   type ResearchState,
   type SearchWebAction,
-  type SourceSummary
+  type SourceSummary,
+  type WorkflowArtifact
 } from "@/lib/heavy/graph/types";
 
 export type RunGraphHeavyInquiryOptions = HeavyStorageOptions & {
@@ -103,6 +104,21 @@ export async function runExistingGraphInquiry(inquiryId: string, turnId: string,
       }
 
       const newlyPromoted = refreshCandidateEvidence(state);
+      const workflowArtifact = createNextWorkflowArtifact(state, cycle);
+      if (workflowArtifact) {
+        state.workflowArtifacts.push(workflowArtifact);
+        await appendTurnEvent(
+          {
+            type: "workflow_artifact_reported",
+            inquiryId,
+            turnId,
+            cycle,
+            artifact: workflowArtifact,
+            timestamp: new Date().toISOString()
+          },
+          options
+        );
+      }
       state.cycleIndex = cycle;
       state.updatedAt = new Date().toISOString();
       await persistGraphState(inquiry, state, options);
@@ -370,6 +386,102 @@ function mergeEvidenceItems(current: EvidenceItem[], next: EvidenceItem[]): Evid
     byId.set(item.id, item);
   }
   return [...byId.values()];
+}
+
+function createNextWorkflowArtifact(state: ResearchState, cycle: number): WorkflowArtifact | null {
+  if (!isWorkflowLikeTask(state.frame.taskKind)) {
+    return null;
+  }
+  if (state.evidenceItems.length === 0 && state.sourceLedger.length === 0) {
+    return null;
+  }
+
+  const existingStages = new Set(state.workflowArtifacts.map((artifact) => artifact.stage));
+  const stage: WorkflowArtifact["stage"] | null = !existingStages.has("draft")
+    ? "draft"
+    : !existingStages.has("critique")
+      ? "critique"
+      : !existingStages.has("revision")
+        ? "revision"
+        : null;
+  if (!stage) {
+    return null;
+  }
+
+  const evidenceFindings = state.evidenceItems.map((item) => item.claim).filter(unique).slice(0, 8);
+  const invalidAssumptions = workflowInvalidAssumptions(state);
+  const orderedGates = workflowOrderedGates(state);
+  const title =
+    stage === "draft"
+      ? "Draft workflow from current evidence"
+      : stage === "critique"
+        ? "Verification critique and invalid assumptions"
+        : "Revised ordered workflow";
+
+  return {
+    id: `workflow_${state.turnId}_${cycle}_${stage}`,
+    cycle,
+    stage,
+    title,
+    summary: workflowArtifactSummary(stage, state),
+    findings: stage === "critique" ? [...evidenceFindings, ...invalidAssumptions].filter(unique) : evidenceFindings,
+    invalidAssumptions: stage === "draft" ? [] : invalidAssumptions,
+    orderedGates: stage === "revision" ? orderedGates : [],
+    sourceUrls: state.evidenceItems.map((item) => item.sourceUrl).filter(unique).slice(0, 20),
+    createdAt: new Date().toISOString()
+  };
+}
+
+function isWorkflowLikeTask(taskKind: ResearchState["frame"]["taskKind"]): boolean {
+  return taskKind === "data_workflow_design" || taskKind === "sales_strategy" || taskKind === "market_list_building" || taskKind === "technical_verification";
+}
+
+function workflowArtifactSummary(stage: WorkflowArtifact["stage"], state: ResearchState): string {
+  if (stage === "draft") {
+    return `Draft path for ${state.frame.deliverable} based on the first evidence set.`;
+  }
+  if (stage === "critique") {
+    return "Critique checks whether the draft overstates what sources prove and identifies invalid assumptions.";
+  }
+  return "Revision rebuilds the workflow as ordered gates with external-verification boundaries and explicit uncertainty.";
+}
+
+function workflowInvalidAssumptions(state: ResearchState): string[] {
+  const text = `${state.frame.userGoal}\n${state.evidenceItems.map((item) => `${item.claim} ${item.paraphrase}`).join("\n")}`.toLowerCase();
+  const assumptions: string[] = [];
+  if (/hs\s*code|hs8542|hts/.test(text)) {
+    assumptions.push("HS code or HTS classification cannot prove EOL/HTF, obsolete inventory, lifecycle status, or allocation risk by itself.");
+  }
+  if (/product description|description|hs\s*code|hs8542|hts/.test(text)) {
+    assumptions.push("Product descriptions and customs classification need external supplier, lifecycle, or inventory verification before they become EOL/HTF evidence.");
+  }
+  if (/for manufacturing|manufacturer|factory/.test(text)) {
+    assumptions.push("FOR MANUFACTURING or manufacturer-like signals should be treated as exclusion/reverse signals unless external evidence proves buyer intent.");
+  }
+  return assumptions.length ? assumptions : ["Current evidence needs an explicit critique pass before the workflow can be treated as reliable."];
+}
+
+function workflowOrderedGates(state: ResearchState): string[] {
+  if (state.frame.taskKind === "data_workflow_design") {
+    return [
+      "Gate 1: clean and normalize HS8542 customs records, product descriptions, dates, quantities, and parties.",
+      "Gate 2: merge importer/exporter entities and preserve aliases, addresses, and source-row lineage.",
+      "Gate 3: exclude manufacturers, internal-use flows, and weak buyer signals before scoring customers.",
+      "Gate 4: verify EOL/HTF and lifecycle status with external supplier, lifecycle, allocation, or inventory sources.",
+      "Gate 5: score demand from shipment recency, frequency, value, supplier diversity, and verified external signals.",
+      "Gate 6: tier customers into A/B/C/D/E groups and store evidence, scores, unknowns, and audit logs."
+    ];
+  }
+  return [
+    "Gate 1: define the success condition and hard exclusions.",
+    "Gate 2: collect evidence from primary or high-signal sources.",
+    "Gate 3: critique invalid assumptions and unsupported claims.",
+    "Gate 4: revise the path and label unknowns before final recommendation."
+  ];
+}
+
+function unique<T>(value: T, index: number, array: T[]): boolean {
+  return array.indexOf(value) === index;
 }
 
 async function completeInquiry(inquiry: Inquiry, state: ResearchState, options: HeavyStorageOptions): Promise<void> {

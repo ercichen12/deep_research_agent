@@ -211,6 +211,18 @@ describe("Graph Heavy type normalization", () => {
       readCharCount: 1200,
       evidenceIds: []
     });
+    state.workflowArtifacts.push({
+      id: "workflow_1_draft",
+      cycle: 1,
+      stage: "draft",
+      title: "Draft DNS workflow",
+      summary: "Draft from source evidence.",
+      findings: ["PSL and NS delegation are hidden criteria."],
+      invalidAssumptions: [],
+      orderedGates: [],
+      sourceUrls: ["https://developers.cloudflare.com/dns/"],
+      createdAt: "2026-07-02T00:00:00.000Z"
+    });
     state.evidenceMatrix = createEmptyEvidenceMatrix(frame, []);
 
     const summary = summarizeGraphState(state);
@@ -224,6 +236,7 @@ describe("Graph Heavy type normalization", () => {
       evidenceCount: 0
     });
     expect(summary.frame.hardConstraints[0].label).toBe("supports authoritative NS delegation");
+    expect(summary.workflowArtifacts?.[0]).toMatchObject({ stage: "draft", title: "Draft DNS workflow" });
     expect(JSON.stringify(summary)).not.toContain("fullText");
   });
 });

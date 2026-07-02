@@ -163,6 +163,44 @@ describe("Graph Heavy orchestrator", () => {
     expect(turn.error).toContain("证据不足");
     expect(state?.status).toBe("failed");
   });
+
+  it("does not finalize HS8542 workflow as a synthetic 100-point candidate", async () => {
+    const inquiry = await runGraphHeavyInquiry(
+      "用 HS8542 海关数据做客户分群，要包括清洗、实体合并、同行识别、客户分级、存储架构，以及 EOL/HTF 的外部验证边界。请用英文搜索关键词，不要用中文搜索关键词。",
+      {
+        rootDir,
+        awaitCompletion: true,
+        provider: customsWorkflowProvider(),
+        budget: {
+          maxCycles: 4,
+          maxActionsPerCycle: 4,
+          maxSearchActionsPerCycle: 2,
+          maxQueriesPerSearchAction: 3,
+          maxResultsPerQuery: 30,
+          maxSourcesToReadPerCycle: 6,
+          maxTotalSourcesToRead: 18,
+          maxPromotedCandidates: 4
+        }
+      }
+    );
+
+    const turn = inquiry.turns[0];
+    const state = await loadGraphState(turn.id, { rootDir });
+    const events = await readTurnEvents(turn.id, { rootDir });
+    const workflowArtifacts = (state as unknown as { workflowArtifacts?: Array<{ stage: string; title: string }> })?.workflowArtifacts ?? [];
+
+    expect(turn.status).toBe("completed");
+    expect(state?.frame.taskKind).toBe("data_workflow_design");
+    expect(state?.cycleIndex).toBeGreaterThanOrEqual(2);
+    expect(state?.candidatePool.some((candidate) => candidate.kind === "workflow")).toBe(false);
+    expect(workflowArtifacts.map((artifact) => artifact.stage)).toEqual(expect.arrayContaining(["draft", "critique", "revision"]));
+    expect(events.map((event) => event.type)).toEqual(expect.arrayContaining(["workflow_artifact_reported", "state_evaluated", "graph_final_reported"]));
+    expect(turn.finalReport?.summary).not.toContain("候选");
+    expect(turn.finalReport?.summary).toMatch(/workflow|路径|流程/i);
+    expect(turn.finalReport?.markdown).toMatch(/HS code|HS8542/i);
+    expect(turn.finalReport?.markdown).toMatch(/cannot be inferred|不能.*推断|外部验证/i);
+    expect(turn.finalReport?.markdown).toMatch(/ordered gates|有序|gate|步骤/i);
+  });
 });
 
 function mockProvider(): HeavySearchProvider {
@@ -243,6 +281,83 @@ function emptyProvider(): HeavySearchProvider {
     },
     async read(result) {
       return { ...result, snippet: result.snippet ?? "", fullText: "" };
+    }
+  };
+}
+
+function customsWorkflowProvider(): HeavySearchProvider {
+  const searchLogs: ReturnType<NonNullable<HeavySearchProvider["drainSearchLogs"]>> = [];
+  const readLogs: ReturnType<NonNullable<HeavySearchProvider["drainReadLogs"]>> = [];
+  const sources: HeavySearchResult[] = [
+    {
+      title: "Customs data cleaning and importer exporter entity resolution workflow",
+      url: "https://trade.example/customs-data-entity-resolution",
+      snippet:
+        "Customs data workflows require data cleaning, importer exporter entity resolution, deduplication, peer detection, customer segmentation, and storage schema design.",
+      provider: "opencli",
+      engine: "google"
+    },
+    {
+      title: "HS and HTS codes classify goods but cannot prove EOL HTF lifecycle status",
+      url: "https://lifecycle.example/hs-code-eol-htf-boundary",
+      snippet:
+        "HS code and HTS classification identify product categories, but EOL, HTF, obsolete status, allocation risk, and lifecycle fit require external supplier or lifecycle database verification.",
+      provider: "opencli",
+      engine: "brave"
+    },
+    {
+      title: "Customer tiering from trade data needs ordered gates",
+      url: "https://analytics.example/trade-data-customer-tiering-gates",
+      snippet:
+        "An ordered workflow should clean records, merge entities, exclude manufacturers, verify external EOL HTF signals, score demand, and tier customers with A/B/C/D/E grades.",
+      provider: "opencli",
+      engine: "duckduckgo"
+    }
+  ];
+
+  return {
+    async search(query, limit = 30) {
+      const results = sources.slice(0, limit);
+      searchLogs.push({
+        provider: "opencli",
+        engine: "google",
+        query,
+        status: "done",
+        results,
+        timestamp: "2026-07-02T00:00:00.000Z",
+        durationMs: 10
+      });
+      return results;
+    },
+    async read(result) {
+      const fullText = [
+        result.snippet ?? "",
+        "Workflow draft: clean HS8542 customs records, normalize descriptions, merge importer/exporter entities, detect peers from shipment patterns, segment customers by volume/value and recency, and store a schema with raw records, normalized entities, evidence, scores, and audit logs.",
+        "Critique: HS code alone cannot prove EOL or HTF status. Product description alone cannot prove obsolete inventory. FOR MANUFACTURING can be a manufacturer exclusion signal and should not be scored as a buyer signal without verification.",
+        "Revision: use ordered gates: data cleaning, entity merge, manufacturer exclusion, external lifecycle verification, demand scoring, customer tiering, storage/audit outputs."
+      ].join("\n");
+      const source: HeavySource = {
+        ...result,
+        snippet: result.snippet ?? "",
+        fullText,
+        readCharCount: fullText.length
+      };
+      readLogs.push({
+        provider: "opencli",
+        status: "done",
+        title: source.title,
+        url: source.url,
+        readCharCount: source.fullText?.length,
+        timestamp: "2026-07-02T00:00:01.000Z",
+        durationMs: 10
+      });
+      return source;
+    },
+    drainSearchLogs() {
+      return searchLogs.splice(0);
+    },
+    drainReadLogs() {
+      return readLogs.splice(0);
     }
   };
 }

@@ -296,6 +296,19 @@ export type EvaluatorDecision = {
   createdAt: string;
 };
 
+export type WorkflowArtifact = {
+  id: string;
+  cycle: number;
+  stage: "draft" | "critique" | "revision";
+  title: string;
+  summary: string;
+  findings: string[];
+  invalidAssumptions: string[];
+  orderedGates: string[];
+  sourceUrls: string[];
+  createdAt: string;
+};
+
 export type GraphHeavyEvent =
   | { type: "frame_created"; inquiryId: string; turnId: string; frame: ResearchFrame; timestamp: string }
   | { type: "cycle_started"; inquiryId: string; turnId: string; cycle: number; timestamp: string }
@@ -308,6 +321,7 @@ export type GraphHeavyEvent =
   | { type: "candidate_extracted"; inquiryId: string; turnId: string; cycle: number; candidates: Candidate[]; timestamp: string }
   | { type: "candidate_promoted"; inquiryId: string; turnId: string; cycle: number; candidate: Candidate; reason: string; timestamp: string }
   | { type: "candidate_rejected"; inquiryId: string; turnId: string; cycle: number; candidateId: string; reason: string; timestamp: string }
+  | { type: "workflow_artifact_reported"; inquiryId: string; turnId: string; cycle: number; artifact: WorkflowArtifact; timestamp: string }
   | { type: "state_evaluated"; inquiryId: string; turnId: string; cycle: number; decision: EvaluatorDecision; timestamp: string }
   | { type: "ranking_completed"; inquiryId: string; turnId: string; candidates: Candidate[]; timestamp: string }
   | { type: "graph_final_reported"; inquiryId: string; turnId: string; report: FinalReport; timestamp: string };
@@ -324,6 +338,7 @@ export type ResearchState = {
   evidenceItems: EvidenceItem[];
   candidatePool: Candidate[];
   evidenceMatrix: EvidenceMatrix;
+  workflowArtifacts: WorkflowArtifact[];
   rejectedPaths: RejectedPath[];
   queryClues: QueryClue[];
   evaluatorDecisions: EvaluatorDecision[];
@@ -348,6 +363,7 @@ export type GraphStateSummary = {
     >
   >;
   evidenceMatrix: EvidenceMatrix;
+  workflowArtifacts?: WorkflowArtifact[];
   rejectedPaths: RejectedPath[];
   evaluatorDecisions: EvaluatorDecision[];
   recentSearchBatches: SearchBatchSummary[];
@@ -558,6 +574,7 @@ export function createResearchState(input: {
     evidenceItems: [],
     candidatePool: [],
     evidenceMatrix: createEmptyEvidenceMatrix(input.frame, []),
+    workflowArtifacts: [],
     rejectedPaths: [],
     queryClues: [],
     evaluatorDecisions: [],
@@ -605,6 +622,7 @@ export function summarizeGraphState(state: ResearchState): GraphStateSummary {
       status: candidate.status
     })),
     evidenceMatrix: state.evidenceMatrix,
+    workflowArtifacts: state.workflowArtifacts ?? [],
     rejectedPaths: state.rejectedPaths,
     evaluatorDecisions: state.evaluatorDecisions,
     recentSearchBatches: state.searchLedger.slice(-20),

@@ -10,7 +10,6 @@ export function finalizeGraphReport(state: ResearchState): FinalReport {
 
   if (!top) {
     if (state.evidenceItems.length > 0 && isWorkflowLikeTask(state.frame.taskKind)) {
-      const evidenceLines = state.evidenceItems.map((item) => `- ${item.claim} [来源](${item.sourceUrl})`).join("\n");
       const constraintLines = state.frame.hardConstraints
         .map((constraint) => {
           const count = state.evidenceItems.filter((item) => item.constraintIds.includes(constraint.id)).length;
@@ -18,8 +17,17 @@ export function finalizeGraphReport(state: ResearchState): FinalReport {
         })
         .join("\n");
       const sourceUrls = state.evidenceItems.map((item) => item.sourceUrl).filter(unique);
+      const artifacts = state.workflowArtifacts;
+      const artifactLines =
+        artifacts
+          .map(
+            (artifact) =>
+              `## Cycle ${artifact.cycle} · ${artifact.stage}\n\n**${artifact.title}**\n\n${artifact.summary}\n\n${formatList("Findings", artifact.findings)}\n${formatList("Invalid assumptions", artifact.invalidAssumptions)}\n${formatList("Ordered gates", artifact.orderedGates)}`
+          )
+          .join("\n\n") || "- 暂无 workflow artifact";
+      const latestRevision = [...artifacts].reverse().find((artifact) => artifact.stage === "revision");
       return {
-        markdown: `# 一句话结论\n\n最大可能路径是围绕 **${state.frame.deliverable}** 执行，而不是把当前证据硬凑成单一候选；现有证据支持先按 workflow / 路径推进，并把未知项显式留出。\n\n# 最大可能答案 / 候选排名\n\n1. ${state.frame.deliverable}\n\n# 证据矩阵\n\n| 条件 | 状态 | 证据数 |\n|---|---|---:|\n${constraintLines}\n\n# 直接证据\n\n${formatEvidence(state.evidenceItems.filter((item) => item.strength === "direct"))}\n\n# 代理证据\n\n${formatEvidence(state.evidenceItems.filter((item) => item.strength === "proxy" || item.strength === "weak"))}\n\n# 排除项和被拒路径\n\n${state.rejectedPaths.map((path) => `- ${path.title}: ${path.reason}`).join("\n") || "- 暂无明确被拒路径"}\n\n# 未确认项\n\n${unknowns.map((item) => `- ${item}`).join("\n") || "- 仍需对关键边界做外部验证"}\n\n# 下一步建议\n\n- 按上述 workflow 先跑小样本，验证每个 gate 的输入、输出和不可推断边界。\n- 对 EOL/HTF、交易资格或 DNS 支持这类外部状态，用官方文档、平台规则或人工抽样二次确认。\n\n# 来源\n\n${sourceUrls.map((url) => `- ${url}`).join("\n")}`,
+        markdown: `# 一句话结论\n\n最大可能路径是围绕 **${state.frame.deliverable}** 执行；这不是单一候选人/公司判断，而是一个需要草案、校验挑错、修正版的 workflow。HS code / HS8542 只能支持品类和贸易流分析，不能单独推断 EOL/HTF。\n\n# 最大可能路径\n\n${latestRevision?.orderedGates.map((gate) => `- ${gate}`).join("\n") || `- ${state.frame.deliverable}`}\n\n# Research Process Artifacts\n\n${artifactLines}\n\n# 证据矩阵\n\n| 条件 | 状态 | 证据数 |\n|---|---|---:|\n${constraintLines}\n\n# 直接证据\n\n${formatEvidence(state.evidenceItems.filter((item) => item.strength === "direct"))}\n\n# 代理证据\n\n${formatEvidence(state.evidenceItems.filter((item) => item.strength === "proxy" || item.strength === "weak"))}\n\n# 排除项和被拒路径\n\n${state.rejectedPaths.map((path) => `- ${path.title}: ${path.reason}`).join("\n") || "- 暂无明确被拒路径"}\n\n# 未确认项\n\n${unknowns.map((item) => `- ${item}`).join("\n") || "- 仍需对关键边界做外部验证"}\n\n# 下一步建议\n\n- 按上述 ordered gates 先跑小样本，验证每个 gate 的输入、输出和不可推断边界。\n- 对 EOL/HTF、交易资格或 DNS 支持这类外部状态，用官方文档、平台规则或人工抽样二次确认。\n\n# 来源\n\n${sourceUrls.map((url) => `- ${url}`).join("\n")}`,
         summary: `最大可能路径：${state.frame.deliverable}`,
         sourceUrls,
         unknowns,
@@ -53,6 +61,13 @@ export function finalizeGraphReport(state: ResearchState): FinalReport {
 
 function formatEvidence(items: ResearchState["evidenceItems"]): string {
   return items.map((item) => `- ${item.claim} [来源](${item.sourceUrl})`).join("\n") || "- 暂无";
+}
+
+function formatList(title: string, items: string[]): string {
+  if (!items.length) {
+    return `**${title}:**\n\n- 暂无`;
+  }
+  return `**${title}:**\n\n${items.map((item) => `- ${item}`).join("\n")}`;
 }
 
 function isWorkflowLikeTask(taskKind: ResearchState["frame"]["taskKind"]): boolean {

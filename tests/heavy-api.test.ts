@@ -65,6 +65,18 @@ describe("Heavy inquiry API routes", () => {
     });
     const state = createResearchState({ inquiryId: inquiry.id, turnId: turn.id, frame, budget: DEFAULT_GRAPH_BUDGET });
     state.cycleIndex = 1;
+    state.workflowArtifacts.push({
+      id: "workflow_api_draft",
+      cycle: 1,
+      stage: "draft",
+      title: "Draft verification workflow",
+      summary: "Initial draft from loaded graph state.",
+      findings: ["PSL and NS delegation must be checked."],
+      invalidAssumptions: [],
+      orderedGates: [],
+      sourceUrls: [],
+      createdAt: "2026-07-02T00:00:00.000Z"
+    });
     await saveGraphState(state, { rootDir });
 
     const response = await createInquiryByIdGetHandler({ rootDir })(
@@ -80,6 +92,9 @@ describe("Heavy inquiry API routes", () => {
         taskKind: "technical_verification"
       }
     });
+    expect(json.graphState.workflowArtifacts).toEqual(
+      expect.arrayContaining([expect.objectContaining({ stage: "draft", title: "Draft verification workflow" })])
+    );
   });
 
   it("GET /api/inquiries/:id marks interrupted running graph turns as stale", async () => {

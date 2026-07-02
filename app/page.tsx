@@ -353,6 +353,19 @@ function EventCard({ event }: { event: HeavyEvent }) {
           <small>{event.decision.reason}</small>
         </>
       ) : null}
+      {event.type === "workflow_artifact_reported" ? (
+        <>
+          <span>{event.artifact.stage}</span>
+          <span>{event.artifact.title}</span>
+          <small>{event.artifact.summary}</small>
+          {event.artifact.invalidAssumptions.slice(0, 2).map((assumption) => (
+            <small key={`${event.artifact.id}-assumption-${assumption}`}>{assumption}</small>
+          ))}
+          {event.artifact.orderedGates.slice(0, 3).map((gate) => (
+            <small key={`${event.artifact.id}-gate-${gate}`}>{gate}</small>
+          ))}
+        </>
+      ) : null}
     </article>
   );
 }
@@ -361,6 +374,7 @@ function GraphStatePanel({ graphState, inquiryId }: { graphState: GraphStateSumm
   const [searchArtifacts, setSearchArtifacts] = useState<Record<string, ArtifactLoadState<SearchBatchArtifact>>>({});
   const [sourceArtifacts, setSourceArtifacts] = useState<Record<string, ArtifactLoadState<SourceArtifact>>>({});
   const recentSources = useMemo(() => dedupeGraphSources(graphState.recentSources), [graphState.recentSources]);
+  const workflowArtifacts = graphState.workflowArtifacts ?? [];
 
   async function loadSearchArtifact(batchId: string) {
     const existing = searchArtifacts[batchId];
@@ -421,9 +435,64 @@ function GraphStatePanel({ graphState, inquiryId }: { graphState: GraphStateSumm
         <Metric label="Search Batches" value={String(graphState.searchBatchCount)} />
         <Metric label="Sources" value={String(graphState.sourceCount)} />
         <Metric label="Evidence" value={String(graphState.evidenceCount)} />
+        <Metric label="Workflow Artifacts" value={String(workflowArtifacts.length)} />
       </div>
 
       <div className="graph-grid">
+        <section className="graph-card">
+          <h3>Workflow Artifacts</h3>
+          {workflowArtifacts.map((artifact) => (
+            <article key={artifact.id}>
+              <div className="artifact-heading">
+                <strong>{artifact.title}</strong>
+                <span>{artifact.stage}</span>
+              </div>
+              <small>Cycle {artifact.cycle}</small>
+              <p>{artifact.summary}</p>
+              {artifact.findings.length > 0 ? (
+                <>
+                  <h4>Findings</h4>
+                  <ul>
+                    {artifact.findings.map((finding) => (
+                      <li key={`${artifact.id}-finding-${finding}`}>{finding}</li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+              {artifact.invalidAssumptions.length > 0 ? (
+                <>
+                  <h4>Invalid Assumptions</h4>
+                  <ul>
+                    {artifact.invalidAssumptions.map((assumption) => (
+                      <li key={`${artifact.id}-assumption-${assumption}`}>{assumption}</li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+              {artifact.orderedGates.length > 0 ? (
+                <>
+                  <h4>Ordered Gates</h4>
+                  <ol>
+                    {artifact.orderedGates.map((gate) => (
+                      <li key={`${artifact.id}-gate-${gate}`}>{gate}</li>
+                    ))}
+                  </ol>
+                </>
+              ) : null}
+              {artifact.sourceUrls.length > 0 ? (
+                <div className="artifact-source-list">
+                  {artifact.sourceUrls.map((url) => (
+                    <a href={url} key={`${artifact.id}-source-${url}`} rel="noreferrer" target="_blank">
+                      {url}
+                    </a>
+                  ))}
+                </div>
+              ) : null}
+            </article>
+          ))}
+          {workflowArtifacts.length === 0 ? <p className="muted">暂无 workflow artifacts。</p> : null}
+        </section>
+
         <section className="graph-card">
           <h3>Search Ledger</h3>
           {graphState.recentSearchBatches.map((batch) => (

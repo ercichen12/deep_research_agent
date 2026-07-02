@@ -176,7 +176,7 @@ describe("Graph Heavy Apodex-derived scenarios", () => {
     expect(queries.some((query) => /HS8542|customs data|entity resolution|EOL|HTF/i.test(query))).toBe(true);
   });
 
-  it("HS8542 workflow sources extract workflow candidate and constraint-level evidence", () => {
+  it("HS8542 workflow sources extract constraint-level evidence without synthetic workflow candidates", () => {
     const frame = createResearchFrame("用 HS8542 海关数据做客户分群，要包括清洗、实体合并、同行识别、客户分级、存储架构，以及 EOL/HTF 的外部验证边界。");
     const output = extractEvidence({
       frame,
@@ -197,7 +197,7 @@ describe("Graph Heavy Apodex-derived scenarios", () => {
     });
     const constraintIds = output.evidenceItems.flatMap((item) => item.constraintIds);
 
-    expect(output.candidates.some((candidate) => candidate.kind === "workflow")).toBe(true);
+    expect(output.candidates.some((candidate) => candidate.kind === "workflow")).toBe(false);
     expect(constraintIds).toEqual(
       expect.arrayContaining([
         "data_cleaning",

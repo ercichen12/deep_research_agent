@@ -211,16 +211,7 @@ export function extractEvidence(input: {
     }
 
     if (input.frame.taskKind === "data_workflow_design") {
-      const workflowCandidate = workflowCandidateForFrame(input.frame);
-      candidates.set(workflowCandidate.id, {
-        id: workflowCandidate.id,
-        kind: workflowCandidate.kind,
-        name: workflowCandidate.name,
-        aliases: workflowCandidate.aliases,
-        summary: "Workflow path based on customs-data cleaning, entity merge, segmentation, and external verification boundaries.",
-        status: "active"
-      });
-      const workflowSubjectIds = [workflowCandidate.id];
+      const workflowSubjectIds = [workflowSubjectIdForFrame(input.frame)];
       pushWorkflowEvidence({
         evidenceItems,
         frame: input.frame,
@@ -394,14 +385,9 @@ function matchingConstraintIds(frame: ResearchFrame, wantedIds: string[]): strin
     .map((constraint) => constraint.id);
 }
 
-function workflowCandidateForFrame(frame: ResearchFrame): DetectedCandidate {
+function workflowSubjectIdForFrame(frame: ResearchFrame): string {
   const hasHs8542 = /hs\s*8542|hs8542/i.test(frame.userGoal);
-  return {
-    id: hasHs8542 ? "cand_workflow_hs8542_customs_customer_segmentation" : "cand_workflow_customs_customer_segmentation",
-    kind: "workflow",
-    name: hasHs8542 ? "HS8542 customs-data customer segmentation workflow" : "Customs-data customer segmentation workflow",
-    aliases: ["customs data workflow", "entity resolution", "customer segmentation", "EOL HTF external verification"]
-  };
+  return hasHs8542 ? "workflow_hs8542_customs_customer_segmentation" : "workflow_customs_customer_segmentation";
 }
 
 function pushWorkflowEvidence(input: {

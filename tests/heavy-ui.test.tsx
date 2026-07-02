@@ -80,12 +80,12 @@ describe("Heavy console UI", () => {
     const inquiry = fixtureInquiry();
     inquiry.graphState = {
       frame: {
-        taskKind: "find_person_company",
+        taskKind: "data_workflow_design",
         userGoal: inquiry.prompt,
-        deliverable: "最大可能候选人",
-        hardConstraints: [{ id: "role", label: "CEO founder senior leadership", kind: "hard", core: true }],
-        softPreferences: [{ id: "growth", label: "30% annual growth proxy", kind: "soft" }],
-        exclusionRules: [{ id: "no_solar", label: "not solar panels", kind: "exclusion" }]
+        deliverable: "HS8542 workflow",
+        hardConstraints: [{ id: "data_cleaning", label: "HS8542 customs data cleaning", kind: "hard", core: true }],
+        softPreferences: [{ id: "ordered_gates", label: "ordered gates", kind: "soft" }],
+        exclusionRules: []
       },
       status: "completed",
       cycleIndex: 1,
@@ -108,29 +108,67 @@ describe("Heavy console UI", () => {
         }
       ],
       evidenceMatrix: {
-        constraintIds: ["role", "growth"],
+        constraintIds: ["data_cleaning", "ordered_gates"],
         candidateIds: ["cand_1"],
         cells: [
           {
             candidateId: "cand_1",
-            constraintId: "role",
+            constraintId: "data_cleaning",
             status: "direct",
             evidenceIds: ["ev_1"],
             bestSourceUrls: ["https://example.com/a"],
-            rationale: "Direct CEO evidence",
+            rationale: "Direct cleaning evidence",
             updatedAt: "2026-07-02T00:00:00.000Z"
           },
           {
             candidateId: "cand_1",
-            constraintId: "growth",
+            constraintId: "ordered_gates",
             status: "missing",
             evidenceIds: [],
             bestSourceUrls: [],
-            rationale: "No exact growth source",
+            rationale: "No ordered gates yet",
             updatedAt: "2026-07-02T00:00:00.000Z"
           }
         ]
       },
+      workflowArtifacts: [
+        {
+          id: "workflow_1_draft",
+          cycle: 1,
+          stage: "draft",
+          title: "Draft workflow from current evidence",
+          summary: "Draft path for HS8542 customer segmentation.",
+          findings: ["Customs data needs cleaning and entity merge."],
+          invalidAssumptions: [],
+          orderedGates: [],
+          sourceUrls: ["https://example.com/a"],
+          createdAt: "2026-07-02T00:00:00.000Z"
+        },
+        {
+          id: "workflow_2_critique",
+          cycle: 2,
+          stage: "critique",
+          title: "Verification critique and invalid assumptions",
+          summary: "HS code alone cannot prove EOL/HTF.",
+          findings: ["HS code alone cannot prove EOL/HTF."],
+          invalidAssumptions: ["Product descriptions need external verification."],
+          orderedGates: [],
+          sourceUrls: ["https://example.com/a"],
+          createdAt: "2026-07-02T00:00:00.000Z"
+        },
+        {
+          id: "workflow_3_revision",
+          cycle: 3,
+          stage: "revision",
+          title: "Revised ordered workflow",
+          summary: "Rebuilt as ordered gates.",
+          findings: ["Use gates before scoring."],
+          invalidAssumptions: ["FOR MANUFACTURING can be an exclusion signal."],
+          orderedGates: ["Gate 1: clean records", "Gate 2: external lifecycle verification"],
+          sourceUrls: ["https://example.com/a"],
+          createdAt: "2026-07-02T00:00:00.000Z"
+        }
+      ],
       rejectedPaths: [],
       evaluatorDecisions: [
         {
@@ -199,13 +237,19 @@ describe("Heavy console UI", () => {
     render(<Home />);
 
     expect(await screen.findByText("Graph Research")).toBeInTheDocument();
-    expect(screen.getByText("find_person_company")).toBeInTheDocument();
+    expect(screen.getByText("data_workflow_design")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Workflow Artifacts" })).toBeInTheDocument();
+    expect(screen.getByText("draft")).toBeInTheDocument();
+    expect(screen.getByText("critique")).toBeInTheDocument();
+    expect(screen.getByText("revision")).toBeInTheDocument();
+    expect(screen.getAllByText("HS code alone cannot prove EOL/HTF.").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Gate 2: external lifecycle verification")).toBeInTheDocument();
     expect(screen.getByText("Search Ledger")).toBeInTheDocument();
     expect(screen.getAllByText("opencli · google").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Candidate Pool")).toBeInTheDocument();
     expect(screen.getByText("Grace Brown / Andromeda Robotics")).toBeInTheDocument();
     expect(screen.getByText("Evidence Matrix")).toBeInTheDocument();
-    expect(screen.getByText("role")).toBeInTheDocument();
+    expect(screen.getByText("data_cleaning")).toBeInTheDocument();
     expect(screen.getAllByText("direct").length).toBeGreaterThanOrEqual(1);
   });
 
