@@ -815,11 +815,12 @@ function createActionId(cycle: number, type: ResearchAction["type"], purpose: st
 }
 
 function toEnglishSearchText(value: string): string {
-  return value
+  const normalized = value
     .replace(/[\u3400-\u9fff\uf900-\ufaff]+/g, " ")
     .replace(/[^\w\s:./"'-]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+  return limitSearchText(normalized);
 }
 
 function isMeaningfulEnglishQuery(value: string): boolean {
@@ -947,6 +948,23 @@ function normalizeCandidateStatus(value: unknown): Candidate["status"] {
 
 function unique<T>(value: T, index: number, array: T[]): boolean {
   return array.indexOf(value) === index;
+}
+
+function limitSearchText(value: string): string {
+  const maxLength = 140;
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  const kept: string[] = [];
+  for (const word of value.split(/\s+/)) {
+    const next = [...kept, word].join(" ");
+    if (next.length > maxLength) {
+      break;
+    }
+    kept.push(word);
+  }
+  return kept.join(" ");
 }
 
 const taskKinds = new Set<TaskKind>([

@@ -209,6 +209,85 @@ export function extractEvidence(input: {
         });
       }
     }
+
+    if (input.frame.taskKind === "data_workflow_design") {
+      const workflowCandidate = workflowCandidateForFrame(input.frame);
+      candidates.set(workflowCandidate.id, {
+        id: workflowCandidate.id,
+        kind: workflowCandidate.kind,
+        name: workflowCandidate.name,
+        aliases: workflowCandidate.aliases,
+        summary: "Workflow path based on customs-data cleaning, entity merge, segmentation, and external verification boundaries.",
+        status: "active"
+      });
+      const workflowSubjectIds = [workflowCandidate.id];
+      pushWorkflowEvidence({
+        evidenceItems,
+        frame: input.frame,
+        base,
+        subjectIds: workflowSubjectIds,
+        text,
+        patterns: /\b(cleaning|cleanse|standardi[sz]ation|normalization|normalize|deduplication|dedupe|data quality|bill of lading|customs data)\b/i,
+        wantedIds: ["data_cleaning"],
+        claim: "HS8542/customs data requires cleaning, normalization, or data-quality gates before segmentation.",
+        paraphrase: "Source text discusses customs-data cleaning, normalization, deduplication, or bill-of-lading data quality."
+      });
+      pushWorkflowEvidence({
+        evidenceItems,
+        frame: input.frame,
+        base,
+        subjectIds: workflowSubjectIds,
+        text,
+        patterns: /\b(entity resolution|entity matching|entity merge|importer|exporter|consignee|shipper|buyer|supplier|deduplication|dedupe)\b/i,
+        wantedIds: ["entity_resolution"],
+        claim: "Importer/exporter records need entity resolution and merge logic.",
+        paraphrase: "Source text links importer/exporter or buyer/supplier records to entity matching, merge, or deduplication."
+      });
+      pushWorkflowEvidence({
+        evidenceItems,
+        frame: input.frame,
+        base,
+        subjectIds: workflowSubjectIds,
+        text,
+        patterns: /\b(peer|competitor|rival|trade lane|shipment pattern|sourcing pattern|supplier|buyer|import|export)\b/i,
+        wantedIds: ["peer_detection"],
+        claim: "Trade-flow records can support peer or competitor detection from shipment patterns.",
+        paraphrase: "Source text discusses peers, competitors, suppliers, buyers, trade lanes, imports/exports, or shipment patterns."
+      });
+      pushWorkflowEvidence({
+        evidenceItems,
+        frame: input.frame,
+        base,
+        subjectIds: workflowSubjectIds,
+        text,
+        patterns: /\b(customer segmentation|customer tiering|tiering|lead scoring|active buyers|demand|volume|value|market)\b/i,
+        wantedIds: ["customer_tiering"],
+        claim: "Customer segmentation or tiering can be built from buyer and demand signals.",
+        paraphrase: "Source text discusses customer segmentation, tiering, active buyers, demand, volume, or value signals."
+      });
+      pushWorkflowEvidence({
+        evidenceItems,
+        frame: input.frame,
+        base,
+        subjectIds: workflowSubjectIds,
+        text,
+        patterns: /\b(schema|data model|database|warehouse|lakehouse|storage|pipeline|workflow architecture|registry)\b/i,
+        wantedIds: ["storage_architecture"],
+        claim: "The workflow needs a data model, schema, storage, or pipeline architecture.",
+        paraphrase: "Source text discusses a data model, schema, database, warehouse/lakehouse, storage, pipeline, or workflow architecture."
+      });
+      pushWorkflowEvidence({
+        evidenceItems,
+        frame: input.frame,
+        base,
+        subjectIds: workflowSubjectIds,
+        text,
+        patterns: /\b(eol|end of life|htf|hard to find|obsolete|lifecycle|hs code|hts|eccn|classification|external verification|cannot be inferred|supplier verification)\b/i,
+        wantedIds: ["external_verification_boundary"],
+        claim: "EOL/HTF status cannot be treated as proven by HS/HTS code alone and needs external verification.",
+        paraphrase: "Source text discusses EOL/HTF, lifecycle/obsolete status, classification limits, or external supplier/database verification."
+      });
+    }
   }
 
   return normalizeEvidenceExtractionOutput({
@@ -313,6 +392,44 @@ function matchingConstraintIds(frame: ResearchFrame, wantedIds: string[]): strin
   return [...frame.hardConstraints, ...frame.softPreferences, ...frame.exclusionRules]
     .filter((constraint) => wanted.has(constraint.id))
     .map((constraint) => constraint.id);
+}
+
+function workflowCandidateForFrame(frame: ResearchFrame): DetectedCandidate {
+  const hasHs8542 = /hs\s*8542|hs8542/i.test(frame.userGoal);
+  return {
+    id: hasHs8542 ? "cand_workflow_hs8542_customs_customer_segmentation" : "cand_workflow_customs_customer_segmentation",
+    kind: "workflow",
+    name: hasHs8542 ? "HS8542 customs-data customer segmentation workflow" : "Customs-data customer segmentation workflow",
+    aliases: ["customs data workflow", "entity resolution", "customer segmentation", "EOL HTF external verification"]
+  };
+}
+
+function pushWorkflowEvidence(input: {
+  evidenceItems: Partial<EvidenceItem>[];
+  frame: ResearchFrame;
+  base: Partial<EvidenceItem>;
+  subjectIds: string[];
+  text: string;
+  patterns: RegExp;
+  wantedIds: string[];
+  claim: string;
+  paraphrase: string;
+}): void {
+  if (!input.patterns.test(input.text)) {
+    return;
+  }
+  const constraintIds = matchingConstraintIds(input.frame, input.wantedIds);
+  if (!constraintIds.length) {
+    return;
+  }
+  input.evidenceItems.push({
+    ...input.base,
+    claim: input.claim,
+    subjectIds: input.subjectIds,
+    constraintIds,
+    paraphrase: input.paraphrase,
+    strength: input.base.sourceType === "official" || input.base.sourceType === "database" ? "direct" : "proxy"
+  });
 }
 
 function sourceText(source: ReadSourceForExtraction): string {

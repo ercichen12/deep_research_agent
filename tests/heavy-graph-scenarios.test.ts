@@ -137,6 +137,79 @@ describe("Graph Heavy Apodex-derived scenarios", () => {
     expect(queries).toMatch(/entity resolution|customer segmentation|EOL|HTF/i);
   });
 
+  it("HS8542 revised searches use compact English keywords instead of replaying raw source excerpts", () => {
+    const state = stateFor("用 HS8542 海关数据做客户分群，要包括清洗、实体合并、同行识别、客户分级、存储架构，以及 EOL/HTF 的外部验证边界。");
+    state.searchLedger.push({
+      id: "batch_rich_no_workflow_evidence",
+      actionId: "act_1",
+      cycle: 1,
+      queries: searchQueries(planGraphActions(state)),
+      queryCount: 3,
+      providerCalls: [],
+      dedupedResultCount: 81,
+      uniqueDomainCount: 65,
+      expectedSignalHits: [],
+      officialOrPrimaryCount: 2,
+      candidateMentions: [],
+      quality: "mixed"
+    });
+    state.sourceLedger.push({
+      sourceHash: "source_long_linkedin_post",
+      title:
+        "semiconductor integratedcircuits customsdata tradedata supplychainintelligence icindustry b2bleadgeneration exportdata importdata hs8542 1 Who s really buying ICs HS 8542 in your target market right now If you re in the semiconductor space you know the challenge trade fairs are great but real demand leaves a trail no fluff just actionable insights",
+      url: "https://www.linkedin.com/posts/example",
+      provider: "opencli",
+      engine: "google",
+      status: "read",
+      readCharCount: 1200,
+      evidenceIds: []
+    });
+    state.cycleIndex = 1;
+    state.budgets.cyclesUsed = 1;
+    state.evaluatorDecisions.push(evaluateGraphState(state));
+
+    const queries = searchQueries(planGraphActions(state));
+
+    expect(queries.length).toBeGreaterThan(0);
+    expect(queries.every((query) => query.length <= 140)).toBe(true);
+    expect(queries.join(" ")).not.toMatch(/Who s really buying|no fluff|actionable insights/i);
+    expect(queries.some((query) => /HS8542|customs data|entity resolution|EOL|HTF/i.test(query))).toBe(true);
+  });
+
+  it("HS8542 workflow sources extract workflow candidate and constraint-level evidence", () => {
+    const frame = createResearchFrame("用 HS8542 海关数据做客户分群，要包括清洗、实体合并、同行识别、客户分级、存储架构，以及 EOL/HTF 的外部验证边界。");
+    const output = extractEvidence({
+      frame,
+      sources: [
+        {
+          summary: source("https://www.wcoomd.org/datamodel", "WCO Data Model - World Customs Organization"),
+          snippet: "Customs data model and trade data records for importer/exporter workflows.",
+          fullText:
+            "HS8542 customs data and bill of lading records need data cleaning, standardization, importer exporter entity resolution, deduplication, peer and competitor detection from shipment patterns, customer segmentation and tiering by volume/value, and a warehouse schema or workflow architecture."
+        },
+        {
+          summary: source("https://example.com/eol-htf", "Electronic components EOL HTF verification beyond HS code"),
+          snippet: "HS and HTS codes classify goods but do not prove lifecycle status.",
+          fullText:
+            "EOL and HTF status cannot be inferred from HS code or HTS classification alone. Electronic component lifecycle, obsolete status, hard-to-find availability, and allocation risk need external supplier or lifecycle database verification."
+        }
+      ]
+    });
+    const constraintIds = output.evidenceItems.flatMap((item) => item.constraintIds);
+
+    expect(output.candidates.some((candidate) => candidate.kind === "workflow")).toBe(true);
+    expect(constraintIds).toEqual(
+      expect.arrayContaining([
+        "data_cleaning",
+        "entity_resolution",
+        "peer_detection",
+        "customer_tiering",
+        "storage_architecture",
+        "external_verification_boundary"
+      ])
+    );
+  });
+
   it("weak or empty search results force revised English queries using discovered clues", () => {
     const state = stateFor("找澳大利亚创新硬件 CEO");
     state.searchLedger.push({

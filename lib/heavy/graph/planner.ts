@@ -45,8 +45,12 @@ export function planGraphActions(state: ResearchState): ResearchAction[] {
   const lastDecision = state.evaluatorDecisions.at(-1);
   const clueSeeds = [
     ...state.queryClues.map((clue) => clue.text),
+    ...(lastDecision?.nextFocus ?? []),
     ...state.sourceLedger.slice(-8).flatMap((source) => [source.title, domainClue(source.url)])
-  ].filter(Boolean);
+  ]
+    .map(compactSearchSeed)
+    .filter(Boolean)
+    .filter(unique);
   const needsRevision = quality === "empty" || quality === "weak" || lastDecision?.action === "revise_query";
   const usedQueries = new Set(state.searchLedger.flatMap((batch) => batch.queries ?? []));
   const sourceTargets = revisionTargetsForTask(state.frame.taskKind);
@@ -57,7 +61,7 @@ export function planGraphActions(state: ResearchState): ResearchAction[] {
   return normalizeResearchActions(
     angles.slice(0, state.budgets.maxSearchActionsPerCycle).map((angle, index) => {
       const revisedQueries = needsRevision
-        ? reviseQueries([...clueSeeds, ...angle.querySeeds], sourceTargets, state.budgets.maxQueriesPerSearchAction)
+        ? reviseQueries(interleaveSeeds(angle.querySeeds, clueSeeds), sourceTargets, state.budgets.maxQueriesPerSearchAction)
         : angle.querySeeds;
       const baseQueries = filterRepeatedQueries(revisedQueries, usedQueries, state.budgets.maxQueriesPerSearchAction);
       return {
@@ -119,13 +123,14 @@ function buildCandidateDeepDiveQueries(state: ResearchState, candidate: { name: 
 
 function reviseQueries(seedQueries: string[], sourceTargets: string[], limit: number): string[] {
   const revised: string[] = [];
-  for (const seed of seedQueries) {
+  for (const rawSeed of seedQueries) {
+    const seed = compactSearchSeed(rawSeed);
     if (!seed) {
       continue;
     }
-    revised.push(seed);
+    pushQuery(revised, seed);
     for (const target of sourceTargets) {
-      revised.push(`${seed} ${target}`);
+      pushQuery(revised, `${seed} ${target}`);
       if (revised.length >= limit) {
         return revised;
       }
@@ -168,6 +173,81 @@ function domainClue(value: string): string {
   }
 }
 
+function interleaveSeeds(primary: string[], secondary: string[]): string[] {
+  const output: string[] = [];
+  const max = Math.max(primary.length, secondary.length);
+  for (let index = 0; index < max; index += 1) {
+    if (primary[index]) {
+      output.push(primary[index]);
+    }
+    if (secondary[index]) {
+      output.push(secondary[index]);
+    }
+  }
+  return output.filter(unique);
+}
+
+function pushQuery(target: string[], query: string): void {
+  const compact = compactSearchSeed(query);
+  if (compact && !target.includes(compact)) {
+    target.push(compact);
+  }
+}
+
+function compactSearchSeed(value: string): string {
+  const normalized = expandPackedDomainTerms(value)
+    .replace(/https?:\/\/\S+/gi, " ")
+    .replace(/\.{2,}/g, " ")
+    .replace(/\b(?:who s really|if you re|you know|every day|for ic manufacturers|whether you re|dm me|comment)\b.*$/i, " ")
+    .replace(/\b(?:linkedin|post|activity)\b/gi, " ")
+    .replace(/[\u3400-\u9fff\uf900-\ufaff]+/g, " ")
+    .replace(/[^\w\s:./"'-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!/[a-z]/i.test(normalized)) {
+    return "";
+  }
+
+  const words = normalized
+    .split(/\s+/)
+    .filter((word) => !revisionNoiseWords.has(word.toLowerCase()))
+    .slice(0, 14);
+  const compact = limitQueryLength(words.join(" "));
+  return compact.length >= 4 ? compact : "";
+}
+
+function expandPackedDomainTerms(value: string): string {
+  return value
+    .replace(/\bintegratedcircuits\b/gi, "integrated circuits")
+    .replace(/\bcustomsdata\b/gi, "customs data")
+    .replace(/\btradedata\b/gi, "trade data")
+    .replace(/\bsupplychainintelligence\b/gi, "supply chain intelligence")
+    .replace(/\bicindustry\b/gi, "IC industry")
+    .replace(/\bb2bleadgeneration\b/gi, "B2B lead generation")
+    .replace(/\bexportdata\b/gi, "export data")
+    .replace(/\bimportdata\b/gi, "import data");
+}
+
+function limitQueryLength(value: string): string {
+  const maxLength = 140;
+  if (value.length <= maxLength) {
+    return value;
+  }
+  const words = value.split(/\s+/);
+  const kept: string[] = [];
+  for (const word of words) {
+    const next = [...kept, word].join(" ");
+    if (next.length > maxLength) {
+      break;
+    }
+    kept.push(word);
+  }
+  return kept.join(" ");
+}
+
 function unique<T>(value: T, index: number, array: T[]): boolean {
   return array.indexOf(value) === index;
 }
+
+const revisionNoiseWords = new Set(["linkedin", "post", "activity", "com", "www"]);

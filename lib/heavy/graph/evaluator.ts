@@ -58,6 +58,7 @@ function sourceCluesFromState(state: ResearchState): string[] {
   return state.sourceLedger
     .slice(-5)
     .map((source) => source.title)
+    .map(compactFocus)
     .filter(Boolean);
 }
 
@@ -85,4 +86,33 @@ function unresolvedFromState(state: ResearchState): string[] {
     .map((cell) => cell.constraintId)
     .filter((value, index, array) => array.indexOf(value) === index);
   return missing.map((constraintId) => `缺少 ${constraintId} 的直接证据`);
+}
+
+function compactFocus(value: string): string {
+  const normalized = value
+    .replace(/\.{2,}/g, " ")
+    .replace(/\b(?:who s really|if you re|you know|every day|for ic manufacturers|whether you re|dm me|comment)\b.*$/i, " ")
+    .replace(/\b(?:linkedin|post|activity)\b/gi, " ")
+    .replace(/[^\w\s:./"'-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!normalized) {
+    return "";
+  }
+
+  const maxLength = 120;
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+
+  const kept: string[] = [];
+  for (const word of normalized.split(/\s+/)) {
+    const next = [...kept, word].join(" ");
+    if (next.length > maxLength) {
+      break;
+    }
+    kept.push(word);
+  }
+  return kept.join(" ");
 }
