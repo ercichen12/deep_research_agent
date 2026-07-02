@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+coverage
+.env
+.env.*
+!.env.example
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.next-dev-*.log
+.research-response*.json
+.research-stream*.ndjson
+research-runs/
+tsconfig.tsbuildinfo

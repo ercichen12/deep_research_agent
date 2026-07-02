@@ -1,0 +1,518 @@
+# The $25 Billion Tech Move That Could Turn Australia Into an AI Powerhouse
+> 原文链接: https://www.youtube.com/watch?v=VBbXTmU6FNI
+
+---
+
+<video src="blob:https://www.youtube.com/63a02578-41c0-4d5d-82f9-e8cf575ca239" controls></video>
+
+Landscape: granola pov script 6 15 4 5 HD
+
+点按取消静音
+
+2x
+
+![](https://yt3.ggpht.com/proxy/BmJErbDLIQoEoPkIEIhH-jVuXHZ6sjCgoLfudEQyzMOnZzRAQrudZa-fbIXEvufXFgTS92xDq8NdeksvjchsNEMag1vtzMGvpblJ3VUE5_f2TXh2zVW07ki_lw3YgPLfN3TFx_dQRDaBxu2R2obd_kus0o7BTFfJnWlFjYbIpknMpwbzfeqhRVqfZO4pRN9SfC8_dJtE1kjUW0lP7DTUFdIrDKeLFe1ln36IBOnbFhs8T5C0ZeRaR0jbrjaGFQiKsJQVrBM=w400-h400-nd)
+
+Stop scribbling. Start doing.
+
+granola.ai/Meeting/Note-Taker
+
+访问网站
+
+赞助商广告
+
+我的广告中心
+
+1/2
+
+granola.ai/meeting/note-taker
+
+跳过
+
+## The $25 Billion Tech Move That Could Turn Australia Into an AI Powerhouse
+
+MY Future Trends 296次观看 1个月前
+
+信息
+
+购物
+
+如果稍后没有开始播放，请尝试重新启动设备。
+
+•
+
+你已退出账号
+
+你观看的视频可能会添加到电视的观看记录中，并影响电视上的推荐内容。为避免发生这种情况，请取消并在计算机上登录 YouTube。
+
+取消确认
+
+分享
+
+包括播放列表
+
+检索分享信息时出错，请稍后重试。
+
+稍后观看
+
+分享
+
+复制链接
+
+0:00
+
+0:00 / 0:22
+
+直播
+
+•观看完整版视频
+
+•
+
+•
+
+## 评论 2
+
+最热门
+
+显示精选评论
+
+最新
+
+显示近期评论，包括疑似垃圾内容
+
+Stop scribbling. Start doing.
+
+赞助商广告
+
+granola.ai/Meeting/Note-Taker
+
+Recipes, our new feature
+
+Combine AI prompts with real workCoach me, prep me, write a brief
+
+[
+
+](https://www.googleadservices.com/pagead/aclk?sa=L&ai=C06cattVEaqW-CMT5n88Pw7eouQiM0tWKiAGZkM3h8xWwkB8QASAAYMme-YbIo6AZggEXY2EtcHViLTYyMTk4MTE3NDcwNDkzNzGgAfDOtIdBqQLI5EmEkTe2PqgDBMgDCqoE3gNP0IocOqni_IPQ4UxjA09LWEENUjdd4OhJjJEjvGHv0BuFYbIuNNH-pdv2wU8VRw1UcHBOvTpuIEmCKDg99EJAKFhG9NUJDW07BIFv3VPvBkWNATwaNCQYVUSke-SWVZo8VgwXDbXajPUcHiqNNTm6Hrtg4VVCIVZsYYawThbRcqaWdyJjNQi6RuVEHNf-c2lIHLNMUXDkDFMpXkQwBEewca7ERfmq7Xn6Y0mEh4G25_AvHCCPt-PdQK7c6NS1JDsO8NONso9mWdyfAde9vphaS2kpLBTIchZPfYqTqIMvySBfaqYD-YU9AsDcVPD_axpENQ2yfwOoZHlxd1B0f_bvMpOZrWBK9D4DjWbWekTgK6T7yQs1_zI5Z9AKNq6e_xCEVEsYLV-0t4MTF4WQwzrMK6PJmarAYsaUbnIb0KjahMmgDp7gNltDPE1OryCMh0yozodA_SYrfu4Y389XQAFUG2lllZiTxu-cnw2L5frpzIWXu4WeHykT-CpMI2G5QbFwBf6kxT4KO9ofvhQ5mGlWBnYC8Edgp0p4gx6DcPwHu_UFRE6-p741l8kCk-eeDR701q5sZAT-LpY8TVhOYwrw4bM2Ag1Ih9nGgAFTz-L6DA8uqNIHaAJ__sSalDKziAWmnYyWWaAGoQGAB_CGhecbkAcEqAfywLECqAe4xLECqAfhtrECqAelz7ECqAfnnbECqAfonbECqAfvtbECqAfwtbECqAf507ECqAfJ2rECqAep4LECqAeECKgHptSxAqgHqNIbqAe2B6gHsJuxAqgHrrGxAqgH_bKxAqgHyM-xAqgHyc-xAqgHzcexAqgH8dGxAqgH_NWxAqgH-9WxAqgHjNaxAqgHi9axAqgHmuKxAqgHm-KxAqgHndexAqgHndSxAqgHgcYbqAf8r7ECqAe-2bECqAerxRuoB5zcG6gHt6GxAqgH1amxAqgH59qxAqgH3rWxAqgHv9OxApIIC2dZZldUeWtVYjFzqAgB0gguCIBBEAEYXjICggI6D4BjgMCAgICAgIACqoCAEEjZoNI1UBRYwNnpr42xlQNgAfIIH2NhLXl0LWhvc3QtcHViLTk3NTA5NzgyODIwMjY5MjeaCRdodHRwczovL3d3dy5ncmFub2xhLmFpL7EJHwm0tCEaLFu5CcnRL31U5d9FyAkDyAkYyAmPAcgJwgHICfgBoQuAWE8Xi9I3ZboLRQgBEAEYBCABKAEwEEABSAFgAGgAcAKIAQCYAQGiARIKABgAIABYAGAAcACoAgHYAgKoAQHYAQGAAgGIAgW6AwV2aWRsc9ALEtoLCwgfEMHi0qGECRgAogwrYhYKFGNvbS5ncmFub2xhLmlvcy1wcm9kagwKCmFpLmdyYW5vbGF4AIgBANIMAhABmg0BEqoNAlVTyA0B0g2wAWh0dHBzOi8vd3d3LmdyYW5vbGEuYWkvYmxvZy9zYXktaGVsbG8tdG8tcmVjaXBlcz91dG1fc291cmNlPWdvb2dsZSZ1dG1fbWVkaXVtPXlvdXR1YmUmdXRtX2NhbXBhaWduPXVzX2RnZW5feXRfc2NhbGUmdXRtX2NvbnRlbnQ9c2tpdF9uZXcmZ2FkX3NvdXJjZT0yJmdhZF9jYW1wYWlnbmlkPTIzOTM3MDkzMjg2uBP___________8BiBQBsBQBwBXJgIBA0BUB2BUBkBYBmBYB4hYCCAGAFwGKFxgIAxgBIAEoATABOAFAAUgBUAFYAWACaAGgFwGpF3tNM-qWv5EBuhcGKAAwADgB0BgB8BgBwhkCCAE&gclid=EAIaIQobChMIpfHpr42xlQMVxPznAx3DGyqHEAEYASAAEgJClvD_BwE&num=1&cid=CAASqwHkaGBiJzoxNSv-hje-9uRxtMspavvDvOKzejIY3YeItIsobIXa4R44We2LIjKmEetDRuBPVSjdsn7PW0uf_I7PpbkPtuCm96DZYGXDNStodMofGDC5tylvN_QlHCrdqjtWZh-9VnqFk_cfdhfCNZrOA1Az26oAq2dDE_9ISH9KprTeB7nEZYfMAlUu8LVUUUgjWOOWRjygg3paufKQ-laUMUi01ZCRDWV45xQ&ad_cpn=%5BAD_CPN%5D&sig=AOD64_0Q_zgUTkp6eR_fVcfYk3k9kdYobg&label=video_sitelink_click&ctype=110&adclksrc=%5BCLICK_SOURCE%5D)
+
+Granola for iPhone
+
+Meeting notes on the go, anytimeGet the most of your phone call
+
+[
+
+](https://www.googleadservices.com/pagead/aclk?sa=L&ai=CGkhpttVEaqW-CMT5n88Pw7eouQiM0tWKiAGZkM3h8xWwkB8QASAAYMme-YbIo6AZggEXY2EtcHViLTYyMTk4MTE3NDcwNDkzNzGgAfDOtIdBqQLI5EmEkTe2PqgDBMgDCqoE3gNP0IocOqni_IPQ4UxjA09LWEENUjdd4OhJjJEjvGHv0BuFYbIuNNH-pdv2wU8VRw1UcHBOvTpuIEmCKDg99EJAKFhG9NUJDW07BIFv3VPvBkWNATwaNCQYVUSke-SWVZo8VgwXDbXajPUcHiqNNTm6Hrtg4VVCIVZsYYawThbRcqaWdyJjNQi6RuVEHNf-c2lIHLNMUXDkDFMpXkQwBEewca7ERfmq7Xn6Y0mEh4G25_AvHCCPt-PdQK7c6NS1JDsO8NONso9mWdyfAde9vphaS2kpLBTIchZPfYqTqIMvySBfaqYD-YU9AsDcVPD_axpENQ2yfwOoZHlxd1B0f_bvMpOZrWBK9D4DjWbWekTgK6T7yQs1_zI5Z9AKNq6e_xCEVEsYLV-0t4MTF4WQwzrMK6PJmarAYsaUbnIb0KjahMmgDp7gNltDPE1OryCMh0yozodA_SYrfu4Y389XQAFUG2lllZiTxu-cnw2L5frpzIWXu4WeHykT-CpMI2G5QbFwBf6kxT4KO9ofvhQ5mGlWBnYC8Edgp0p4gx6DcPwHu_UFRE6-p741l8kCk-eeDR701q5sZAT-LpY8TVhOYwrw4bM2Ag1Ih9nGgAFTz-L6DA8uqNIHaAJ__sSalDKziAWmnYyWWaAGoQGAB_CGhecbkAcEqAfywLECqAe4xLECqAfhtrECqAelz7ECqAfnnbECqAfonbECqAfvtbECqAfwtbECqAf507ECqAfJ2rECqAep4LECqAeECKgHptSxAqgHqNIbqAe2B6gHsJuxAqgHrrGxAqgH_bKxAqgHyM-xAqgHyc-xAqgHzcexAqgH8dGxAqgH_NWxAqgH-9WxAqgHjNaxAqgHi9axAqgHmuKxAqgHm-KxAqgHndexAqgHndSxAqgHgcYbqAf8r7ECqAe-2bECqAerxRuoB5zcG6gHt6GxAqgH1amxAqgH59qxAqgH3rWxAqgHv9OxApIIC2dZZldUeWtVYjFzqAgB0gguCIBBEAEYXjICggI6D4BjgMCAgICAgIACqoCAEEjZoNI1UBRYwNnpr42xlQNgAfIIH2NhLXl0LWhvc3QtcHViLTk3NTA5NzgyODIwMjY5MjeaCRdodHRwczovL3d3dy5ncmFub2xhLmFpL7EJQOyN9unlGz65CcOp7I6lcVhzyAkDyAkYyAmPAcgJwgHICfgBoQuAWE8Xi9I3ZboLRQgBEAEYBCABKAEwEEABSAFgAGgAcAKIAQCYAQGiARIKABgAIABYAGAAcACoAgHYAgKoAQHYAQGAAgGIAgW6AwV2aWRsc9ALEtoLCwgfEL7i0qGECRgBogwrYhYKFGNvbS5ncmFub2xhLmlvcy1wcm9kagwKCmFpLmdyYW5vbGF4AIgBANIMAhABmg0BEqoNAlVTyA0B0g3QAWh0dHBzOi8vd3d3LmdyYW5vbGEuYWkvP2FmX2pzX3dlYj10cnVlJmFmX3NzX3Zlcj0yXzlfMyZwaWQ9dW5rbm93biZhZl9zc191aT10cnVlJnV0bV9zb3VyY2U9Z29vZ2xlJnV0bV9tZWRpdW09eW91dHViZSZ1dG1fY2FtcGFpZ249dXNfZGdlbl95dF9zY2FsZSZ1dG1fY29udGVudD1za2l0X25ldyZnYWRfc291cmNlPTImZ2FkX2NhbXBhaWduaWQ9MjM5MzcwOTMyODa4E____________wGIFAGwFAHAFcmAgEDQFQHYFQGQFgGYFgHiFgIIAYAXAYoXGAgDGAEgASgBMAE4AUABSAFQAVgBYAJoAaAXAakXe00z6pa_kQG6FwYoADAAOAHQGAHwGAHCGQIIAQ&gclid=EAIaIQobChMIpfHpr42xlQMVxPznAx3DGyqHEAEYASAAEgJClvD_BwE&num=1&cid=CAASqwHkaGBiJzoxNSv-hje-9uRxtMspavvDvOKzejIY3YeItIsobIXa4R44We2LIjKmEetDRuBPVSjdsn7PW0uf_I7PpbkPtuCm96DZYGXDNStodMofGDC5tylvN_QlHCrdqjtWZh-9VnqFk_cfdhfCNZrOA1Az26oAq2dDE_9ISH9KprTeB7nEZYfMAlUu8LVUUUgjWOOWRjygg3paufKQ-laUMUi01ZCRDWV45xQ&ad_cpn=%5BAD_CPN%5D&sig=AOD64_2kMqj9LKbZJP4ICll4ZjAOzAUDzQ&label=video_sitelink_click&ctype=110&adclksrc=%5BCLICK_SOURCE%5D)
+
+Blog - Stay up to date
+
+Unlock Granola’s full powerCheck regularly our blog for update
+
+[
+
+](https://www.googleadservices.com/pagead/aclk?sa=L&ai=CV4nJttVEaqW-CMT5n88Pw7eouQiM0tWKiAGZkM3h8xWwkB8QASAAYMme-YbIo6AZggEXY2EtcHViLTYyMTk4MTE3NDcwNDkzNzGgAfDOtIdBqQLI5EmEkTe2PqgDBMgDCqoE3gNP0IocOqni_IPQ4UxjA09LWEENUjdd4OhJjJEjvGHv0BuFYbIuNNH-pdv2wU8VRw1UcHBOvTpuIEmCKDg99EJAKFhG9NUJDW07BIFv3VPvBkWNATwaNCQYVUSke-SWVZo8VgwXDbXajPUcHiqNNTm6Hrtg4VVCIVZsYYawThbRcqaWdyJjNQi6RuVEHNf-c2lIHLNMUXDkDFMpXkQwBEewca7ERfmq7Xn6Y0mEh4G25_AvHCCPt-PdQK7c6NS1JDsO8NONso9mWdyfAde9vphaS2kpLBTIchZPfYqTqIMvySBfaqYD-YU9AsDcVPD_axpENQ2yfwOoZHlxd1B0f_bvMpOZrWBK9D4DjWbWekTgK6T7yQs1_zI5Z9AKNq6e_xCEVEsYLV-0t4MTF4WQwzrMK6PJmarAYsaUbnIb0KjahMmgDp7gNltDPE1OryCMh0yozodA_SYrfu4Y389XQAFUG2lllZiTxu-cnw2L5frpzIWXu4WeHykT-CpMI2G5QbFwBf6kxT4KO9ofvhQ5mGlWBnYC8Edgp0p4gx6DcPwHu_UFRE6-p741l8kCk-eeDR701q5sZAT-LpY8TVhOYwrw4bM2Ag1Ih9nGgAFTz-L6DA8uqNIHaAJ__sSalDKziAWmnYyWWaAGoQGAB_CGhecbkAcEqAfywLECqAe4xLECqAfhtrECqAelz7ECqAfnnbECqAfonbECqAfvtbECqAfwtbECqAf507ECqAfJ2rECqAep4LECqAeECKgHptSxAqgHqNIbqAe2B6gHsJuxAqgHrrGxAqgH_bKxAqgHyM-xAqgHyc-xAqgHzcexAqgH8dGxAqgH_NWxAqgH-9WxAqgHjNaxAqgHi9axAqgHmuKxAqgHm-KxAqgHndexAqgHndSxAqgHgcYbqAf8r7ECqAe-2bECqAerxRuoB5zcG6gHt6GxAqgH1amxAqgH59qxAqgH3rWxAqgHv9OxApIIC2dZZldUeWtVYjFzqAgB0gguCIBBEAEYXjICggI6D4BjgMCAgICAgIACqoCAEEjZoNI1UBRYwNnpr42xlQNgAfIIH2NhLXl0LWhvc3QtcHViLTk3NTA5NzgyODIwMjY5MjeaCRdodHRwczovL3d3dy5ncmFub2xhLmFpL7EJx8y-_z0lLmG5CdH0TMWOR16CyAkDyAkYyAmPAcgJwgHICfgBoQuAWE8Xi9I3ZboLRQgBEAEYBCABKAEwEEABSAFgAGgAcAKIAQCYAQGiARIKABgAIABYAGAAcACoAgHYAgKoAQHYAQGAAgGIAgW6AwV2aWRsc9ALEtoLCwgfEMTi0qGECRgAogwrYhYKFGNvbS5ncmFub2xhLmlvcy1wcm9kagwKCmFpLmdyYW5vbGF4AIgBANIMAhABmg0BEqoNAlVTyA0B0g2bAWh0dHBzOi8vd3d3LmdyYW5vbGEuYWkvYmxvZz91dG1fc291cmNlPWdvb2dsZSZ1dG1fbWVkaXVtPXlvdXR1YmUmdXRtX2NhbXBhaWduPXVzX2RnZW5feXRfc2NhbGUmdXRtX2NvbnRlbnQ9c2tpdF9uZXcmZ2FkX3NvdXJjZT0yJmdhZF9jYW1wYWlnbmlkPTIzOTM3MDkzMjg2uBP___________8BiBQBsBQBwBXJgIBA0BUB2BUBkBYBmBYB4hYCCAGAFwGKFxgIAxgBIAEoATABOAFAAUgBUAFYAWACaAGgFwGpF3tNM-qWv5EBuhcGKAAwADgB0BgB8BgBwhkCCAE&gclid=EAIaIQobChMIpfHpr42xlQMVxPznAx3DGyqHEAEYASAAEgJClvD_BwE&num=1&cid=CAASqwHkaGBiJzoxNSv-hje-9uRxtMspavvDvOKzejIY3YeItIsobIXa4R44We2LIjKmEetDRuBPVSjdsn7PW0uf_I7PpbkPtuCm96DZYGXDNStodMofGDC5tylvN_QlHCrdqjtWZh-9VnqFk_cfdhfCNZrOA1Az26oAq2dDE_9ISH9KprTeB7nEZYfMAlUu8LVUUUgjWOOWRjygg3paufKQ-laUMUi01ZCRDWV45xQ&ad_cpn=%5BAD_CPN%5D&sig=AOD64_3WxsLtqd2FhYuoUSuRpFd69JcTAQ&label=video_sitelink_click&ctype=110&adclksrc=%5BCLICK_SOURCE%5D)
+
+[
+
+访问网站
+
+](https://www.googleadservices.com/pagead/aclk?sa=L&ai=C7KTattVEaqW-CMT5n88Pw7eouQiM0tWKiAGZkM3h8xWwkB8QASAAYMme-YbIo6AZggEXY2EtcHViLTYyMTk4MTE3NDcwNDkzNzGgAfDOtIdBqQLI5EmEkTe2PqgDBMgDCqoE3gNP0IocOqni_IPQ4UxjA09LWEENUjdd4OhJjJEjvGHv0BuFYbIuNNH-pdv2wU8VRw1UcHBOvTpuIEmCKDg99EJAKFhG9NUJDW07BIFv3VPvBkWNATwaNCQYVUSke-SWVZo8VgwXDbXajPUcHiqNNTm6Hrtg4VVCIVZsYYawThbRcqaWdyJjNQi6RuVEHNf-c2lIHLNMUXDkDFMpXkQwBEewca7ERfmq7Xn6Y0mEh4G25_AvHCCPt-PdQK7c6NS1JDsO8NONso9mWdyfAde9vphaS2kpLBTIchZPfYqTqIMvySBfaqYD-YU9AsDcVPD_axpENQ2yfwOoZHlxd1B0f_bvMpOZrWBK9D4DjWbWekTgK6T7yQs1_zI5Z9AKNq6e_xCEVEsYLV-0t4MTF4WQwzrMK6PJmarAYsaUbnIb0KjahMmgDp7gNltDPE1OryCMh0yozodA_SYrfu4Y389XQAFUG2lllZiTxu-cnw2L5frpzIWXu4WeHykT-CpMI2G5QbFwBf6kxT4KO9ofvhQ5mGlWBnYC8Edgp0p4gx6DcPwHu_UFRE6-p741l8kCk-eeDR701q5sZAT-LpY8TVhOYwrw4bM2Ag1Ih9nGgAFTz-L6DA8uqNIHaAJ__sSalDKziAWmnYyWWaAGoQGAB_CGhecbkAcEqAfywLECqAe4xLECqAfhtrECqAelz7ECqAfnnbECqAfonbECqAfvtbECqAfwtbECqAf507ECqAfJ2rECqAep4LECqAeECKgHptSxAqgHqNIbqAe2B6gHsJuxAqgHrrGxAqgH_bKxAqgHyM-xAqgHyc-xAqgHzcexAqgH8dGxAqgH_NWxAqgH-9WxAqgHjNaxAqgHi9axAqgHmuKxAqgHm-KxAqgHndexAqgHndSxAqgHgcYbqAf8r7ECqAe-2bECqAerxRuoB5zcG6gHt6GxAqgH1amxAqgH59qxAqgH3rWxAqgH6rGxAqgHvrexAqgHmbWxAqgHhcGxAqgH66WxAqgHyqmxApIIC2dZZldUeWtVYjFzqAgB0gguCIBBEAEYXjICggI6D4BjgMCAgICAgIACqoCAEEjZoNI1UBRYwNnpr42xlQNgAfIIH2NhLXl0LWhvc3QtcHViLTk3NTA5NzgyODIwMjY5MjeaCRdodHRwczovL3d3dy5ncmFub2xhLmFpL7EJsNEbnt9H69fICQPICRjICY8ByAnCAcgJ-AGYCwGhC4BYTxeL0jdlugtFCAEQARgEIAEoATAQQAFIAWAAaABwAogBAJgBAaIBEgoAGAAgAFgAYABwAKgCAdgCAqgBAdgBAYACAYgCBboDBXZpZGxz0AsSogwrYhYKFGNvbS5ncmFub2xhLmlvcy1wcm9kagwKCmFpLmdyYW5vbGF4AIgBANIMAhAB2gwlCgoQ8KiW2N374Z5XEgIBAxoNGKadjJZZIMvtr-LqBUABSgIQH5oNARKqDQJVU8gNAdINlwFodHRwczovL3d3dy5ncmFub2xhLmFpLz91dG1fc291cmNlPWdvb2dsZSZ1dG1fbWVkaXVtPXlvdXR1YmUmdXRtX2NhbXBhaWduPXVzX2RnZW5feXRfc2NhbGUmdXRtX2NvbnRlbnQ9c2tpdF9uZXcmZ2FkX3NvdXJjZT0yJmdhZF9jYW1wYWlnbmlkPTIzOTM3MDkzMjg2uBP___________8BiBQBsBQBwBXJgIBA0BUB2BUBkBYBmBYB4hYCCAGAFwGKFxgIAxgBIAEoATABOAFAAUgBUAFYAWACaAGgFwGpF3tNM-qWv5EBuhcGKAAwADgB0BgB8BgBwhkCCAE&ase=2&gclid=EAIaIQobChMIpfHpr42xlQMVxPznAx3DGyqHEAEYASAAEgJClvD_BwE&num=1&cid=CAASqwHkaGBiJzoxNSv-hje-9uRxtMspavvDvOKzejIY3YeItIsobIXa4R44We2LIjKmEetDRuBPVSjdsn7PW0uf_I7PpbkPtuCm96DZYGXDNStodMofGDC5tylvN_QlHCrdqjtWZh-9VnqFk_cfdhfCNZrOA1Az26oAq2dDE_9ISH9KprTeB7nEZYfMAlUu8LVUUUgjWOOWRjygg3paufKQ-laUMUi01ZCRDWV45xQ&ad_cpn=%5BAD_CPN%5D&sig=AOD64_00gj8CectmiE1kMrjEnYIkZrA1kg&label=video_click_to_advertiser_site&ctype=110&ms=%5BCLICK_MS%5D&adclksrc=%5BCLICK_SOURCE%5D)
+
+## 在此视频中
+
+转写文稿
+
+## 说明
+
+The $25 Billion Tech Move That Could Turn Australia Into an AI Powerhouse
+
+8赞
+
+296观看次数
+
+5月2日2026年
+
+Australia AI Investment $25B Explained (Shocking Tech Move That Could Change Global Power) Australia has just announced a massive $25 billion investment into artificial intelligence, a move that could completely reshape its economy and position in the global tech race. In this video, we break down how Australia’s artificial intelligence strategy is designed to turn the country into a global AI powerhouse and what this means for the United States, China, and the rest of the world. This deep dive explores why Australia is investing so heavily in AI infrastructure, including data centers, renewable energy-powered computing systems, education programs, and advanced research funding. We also analyze how Australia AI investment could transform industries like healthcare, agriculture, mining, and finance through automation and machine learning innovation. But the big question remains: Will Australia become an AI superpower? Or is this $25 billion tech move too ambitious in a global AI race already dominated by tech giants in the USA and China? You’ll discover the strategic advantages Australia holds, including clean energy resources, political stability, and strong academic institutions driving artificial intelligence development. In this video, you’ll also learn: • Why is Australia investing $25 billion in AI technology? • Can Australia really compete with USA and China in artificial intelligence? • How will AI data centers in Australia impact the global tech industry? • What jobs and economic opportunities will come from Australia’s AI boom? We also compare Australia’s approach to ethical AI development and sustainable infrastructure, showing how it could set new global standards for responsible artificial intelligence growth. If you’re interested in AI news, future technology trends, and global economic shifts, this video is essential viewing. Stay ahead of the curve as we uncover one of the biggest tech transformations happening right now. Subscribe for more insights into AI, technology, and the future of global innovation. [#AustraliaAI](https://www.youtube.com/hashtag/australiaai) [#ArtificialIntelligence](https://www.youtube.com/hashtag/artificialintelligence) [#AITechnology](https://www.youtube.com/hashtag/aitechnology) [#TechNews](https://www.youtube.com/hashtag/technews) [#AIFuture](https://www.youtube.com/hashtag/aifuture) [#GlobalEconomy](https://www.youtube.com/hashtag/globaleconomy) …...更多
+
+...更多 收起
+
+内容制作方式
+
+由 AI 生成
+
+声音或影像内容经过加工或完全由 AI 生成。 [了解详情](https://support.google.com/youtube/answer/15447836?hl=zh-CN)
+
+转写文稿
+
+通过文字转写了解视频内容。
+
+内容转文字
+
+[
+
+### MY Future Trends
+
+2.43万位订阅者
+
+](https://www.youtube.com/@MYFutureTrends-v2u)
+
+[
+
+视频
+
+](https://www.youtube.com/channel/UC3z6Gd29i8ma_Q_6mnU2xPQ/videos)[
+
+简介
+
+](https://www.youtube.com/channel/UC3z6Gd29i8ma_Q_6mnU2xPQ/about)
+
+## 转写文稿
+
+# The $25 Billion Tech Move That Could Turn Australia Into an AI Powerhouse
+
+AI
+
+MY Future Trends和Rising Economy
+
+订阅
+
+8
+
+分享
+
+保存
+
+下载
+
+下载
+
+296次观看 1个月前 [AUSTRALIA](https://www.youtube.com/results?search_query=Australia&sp=EiG4AQHCARtDaElKMzhXSFp3ZjlLeXNSVWhOYmxhRm5nbE0%253D)
+
+296次观看 • 2026年5月2日 • AUSTRALIA
+
+Australia AI Investment $25B Explained (Shocking Tech Move That Could Change Global Power) Australia has just announced a massive $25 billion invest …...更多
+
+...更多
+
+内容制作方式
+
+由 AI 生成
+
+声音或影像内容经过加工或完全由 AI 生成。 [了解详情](https://support.google.com/youtube/answer/15447836?hl=zh-CN)
+
+转写文稿
+
+通过文字转写了解视频内容。
+
+内容转文字
+
+[
+
+### MY Future Trends
+
+2.43万位订阅者
+
+](https://www.youtube.com/@MYFutureTrends-v2u)
+
+[
+
+视频
+
+](https://www.youtube.com/channel/UC3z6Gd29i8ma_Q_6mnU2xPQ/videos)[
+
+简介
+
+](https://www.youtube.com/channel/UC3z6Gd29i8ma_Q_6mnU2xPQ/about)
+
+收起
+
+[](https://www.youtube.com/results?search_query=Australia&sp=EiG4AQHCARtDaElKMzhXSFp3ZjlLeXNSVWhOYmxhRm5nbE0%253D)[AUSTRALIA](https://www.youtube.com/results?search_query=Australia&sp=EiG4AQHCARtDaElKMzhXSFp3ZjlLeXNSVWhOYmxhRm5nbE0%253D)
+
+# The $25 Billion Tech Move That Could Turn Australia Into an AI Powerhouse
+
+AI
+
+296次观看296次观看
+
+2026年5月2日
+
+8
+
+分享
+
+保存
+
+下载
+
+下载
+
+[Turn moving day into movie night](https://www.googleadservices.com/pagead/aclk?sa=L&ai=C2hBIttVEapjMCKHUn88P4Lft8QrxyJPnhgHttqLn4hVkEAEgAGDJnvmGyKOgGYIBF2NhLXB1Yi02MjE5ODExNzQ3MDQ5MzcxoAHr_e3iAagDBMgDCqoEwANP0GcpsQqUg54Wb4yWHLHwIHLZeH0hSUV7DL77z1V8_5kPbUw_wX89n7VoH57tgw6nts2kQFYqACk1uIKK-bfvUb20RCdfST_E0mzZSQ31HOdHLakRQM8Zq_H3f5wU_4nty3LTGnJjlc_HH9_w-9d6UMdZLTh_nMEiMS2RNBZbzolKx6JY0z9mACau0RJ7vCRAvgTdIt2nukIttEnAtnbC5HxyrESqshUyRc7lmfcxy_7rDIiAC-F15_CM7NG4u3dEK3PCSM_hsHzSA2kmmouQUmMcO7PRXsjVMN1kgaiMKyaFKdUFAm1hCs1jRj1PY7nhkoWbl5CEOzoItmH_mz71BOxEf7OOa6zmEjnyq5abrkZ6WV7giLclfak44cUydeP_VHwGyz35l1SCoaPlD9q6yGMGJjunK3shINYVWq6mcfo0dnmu0CgpGtMdPsTi32oY-X7vSCRV_ZVwxt0itANaz43n7JbWejwOOeuFkJTNJQ_zHOlTSp5WlgylzPUtFeqRlJqm1_X_JOALf8L69PhMJicfkTaMwkA8YwYjZ4rqv1jDcZk62hArJ8QNfx4T4nEA5B8ubrm_E6xCgDFor4m3iAWq6PTWWJIFCggTaAJ40ou2nQKgBm6AB_2Bkp0CkAcEqAfywLECqAe4xLECqAfhtrECqAelz7ECqAfnnbECqAfonbECqAfvtbECqAfwtbECqAf507ECqAfJ2rECqAep4LECqAeECKgHptSxAqgHqNIbqAe2B6gHsdwbqAewm7ECqAeusbECqAf9srECqAfIz7ECqAfJz7ECqAfNx7ECqAfx0bECqAf81bECqAf71bECqAeM1rECqAeL1rECqAea4rECqAeb4rECqAed17ECqAed1LECqAeBxhuoB_yvsQKoB77ZsQKoB6vFG6gHt6GxAqgH1amxAqgH3rWxAqgH6rGxAqgHvrexAqgHmbWxAqgHhcGxAqgH66WxAqgHyqmxAtIILgiAQRABGF4yAoICOg-AY4DAgICAgICAAqqAgBBI2aDSNVAUWJDp6a-NsZUDYAHyCB9jYS15dC1ob3N0LXB1Yi05NzUwOTc4MjgyMDI2OTI3mgkqaHR0cHM6Ly93d3cueGZpbml0eS5jb20vbGVhcm4vZGVhbHMvb2ZmZXJzsQlLgymyqIGNPsgJAMgJigKhC4BYTxeL0jdlugs9CAEQBRgEIAgoATAaQAFIAFgBYABoAHABiAEAmAEBogEICgCoAgHYAgKoAQHYAQOAAgGIAgW6AwV2aWRsc9ALEuALAaIMM2IUChJjb20uY29tY2FzdC5jaW0ueDJqFgoUY29tLnhmaW5pdHkuY2xvdWR0dnJ4AIgBANIMAhAB2gwmCgsQgJnVr_H5tILwARICAQMaDRiq6PTWWCCa-faK4AVAAUoCEB-aDQESqg0CVVPIDQHSDc4EaHR0cHM6Ly9hZC5kb3VibGVjbGljay5uZXQvZGRtL3RyYWNrY2xrL044NjY3LjM5ODAxNzVJTl9IT1VTRV9DTVNURFYzL0IzNDc0NzA4MC40MzQ3MTM0ODc7ZGNfdHJrX2FpZD02MjgzNDA4MDY7ZGNfdHJrX2NpZD02MTY0OTY4NztkY19kYm1fdG9rZW49QU9qZUxORUFBQUE2Q2pRS0RBZ0FGUUFBQUFBZEFBQUFBQklNQ0FBVkFBQUFBQjBBQUFBQUloUUlxdWowMWxpb0F0S0x0cDBDc0FMNGo5SG9BMEE3RUpiRVB2NE9MQ1B6bGFpR1BTTllYOFQ2WllFPTtkY19sYXQ9O2RjX3JkaWQ9O3RhZ19mb3JfY2hpbGRfZGlyZWN0ZWRfdHJlYXRtZW50PTt0ZnVhPTtsdGQ9O2RjX3Rkdj0xOztkY190cmFuc3BhcmVudD0xO2RjX3J1aT0xO2RjX2Vwcz1BSGFzOGNBZEVZUE9GZlpMLUtRbUFaRkxaTjh4c1U2YWg1U2RrS1U3S1Bxcnc3U3JnbHJkbFlicVppWktCaXUwQzl2UUZUUGtqajB4czBXM2FIcGJBUTtkY19wdWJpZD02P2h0dHBzOi8vd3d3LnhmaW5pdHkuY29tL2xlYXJuL2RlYWxzL29mZmVycz9DTVA9QkFDOkRFTS0zNDc0NzA4MC02NTIyMjg2LTQzNDcxMzQ4Ny02MTY0OTY4NyZnYWRfc291cmNlPTImZ2FkX2NhbXBhaWduaWQ9MjM4MDQ1ODkwOTiwE7PT4CK4E____________wGIFAWwFAHAFYGAgEDQFQHYFQGYFgGoFgHiFgIIAYAXAYoXGAgDGAEgASgBMAE4AUABSAFQAVgBYAJoAaAXAakXfdZpm_pE6fe6FwYoADAAOAHQGAHwGAHCGQIIAQ&ase=2&gclid=EAIaIQobChMImP_pr42xlQMVIernAx3gWzuuEAEYASAAEgKo_PD_BwE&num=1&cid=CAASqwHkaJlZt8_8uIlRQ_YHYZWtQyF2dg0HR0b3LgVVU0dU7fcOC8D0N-ErLvCcpD5lVebsWW4aGo1t6meJt7-RdTGETy-73WMvJzWRv4I5_cbdKmTwPVafrIm3XNKv81m3krkD4XKJvc59YYQbsFY3guvtFM_qXsa0bXXNBKgSVPrRjizjbbc005mdl7qLm8Xfeu7-PncOlPgrZMOa2tFPrPRfrz2VnpZbf0GGaxw&sig=AOD64_0sZSMM63glJvKFbcywTTy1crajIw&ms=%5BCLICK_MS%5D&nb=0&nx=%5BNX%5D&ny=%5BNY%5D&dim=%5BDIM%5D)[Get same-day WiFi. Be online in minutes. One internet price for 5 years. Guaranteed.](https://www.googleadservices.com/pagead/aclk?sa=L&ai=C2hBIttVEapjMCKHUn88P4Lft8QrxyJPnhgHttqLn4hVkEAEgAGDJnvmGyKOgGYIBF2NhLXB1Yi02MjE5ODExNzQ3MDQ5MzcxoAHr_e3iAagDBMgDCqoEwANP0GcpsQqUg54Wb4yWHLHwIHLZeH0hSUV7DL77z1V8_5kPbUw_wX89n7VoH57tgw6nts2kQFYqACk1uIKK-bfvUb20RCdfST_E0mzZSQ31HOdHLakRQM8Zq_H3f5wU_4nty3LTGnJjlc_HH9_w-9d6UMdZLTh_nMEiMS2RNBZbzolKx6JY0z9mACau0RJ7vCRAvgTdIt2nukIttEnAtnbC5HxyrESqshUyRc7lmfcxy_7rDIiAC-F15_CM7NG4u3dEK3PCSM_hsHzSA2kmmouQUmMcO7PRXsjVMN1kgaiMKyaFKdUFAm1hCs1jRj1PY7nhkoWbl5CEOzoItmH_mz71BOxEf7OOa6zmEjnyq5abrkZ6WV7giLclfak44cUydeP_VHwGyz35l1SCoaPlD9q6yGMGJjunK3shINYVWq6mcfo0dnmu0CgpGtMdPsTi32oY-X7vSCRV_ZVwxt0itANaz43n7JbWejwOOeuFkJTNJQ_zHOlTSp5WlgylzPUtFeqRlJqm1_X_JOALf8L69PhMJicfkTaMwkA8YwYjZ4rqv1jDcZk62hArJ8QNfx4T4nEA5B8ubrm_E6xCgDFor4m3iAWq6PTWWJIFCggTaAJ40ou2nQKgBm6AB_2Bkp0CkAcEqAfywLECqAe4xLECqAfhtrECqAelz7ECqAfnnbECqAfonbECqAfvtbECqAfwtbECqAf507ECqAfJ2rECqAep4LECqAeECKgHptSxAqgHqNIbqAe2B6gHsdwbqAewm7ECqAeusbECqAf9srECqAfIz7ECqAfJz7ECqAfNx7ECqAfx0bECqAf81bECqAf71bECqAeM1rECqAeL1rECqAea4rECqAeb4rECqAed17ECqAed1LECqAeBxhuoB_yvsQKoB77ZsQKoB6vFG6gHt6GxAqgH1amxAqgH3rWxAqgH6rGxAqgHvrexAqgHmbWxAqgHhcGxAqgH66WxAqgHyqmxAtIILgiAQRABGF4yAoICOg-AY4DAgICAgICAAqqAgBBI2aDSNVAUWJDp6a-NsZUDYAHyCB9jYS15dC1ob3N0LXB1Yi05NzUwOTc4MjgyMDI2OTI3mgkqaHR0cHM6Ly93d3cueGZpbml0eS5jb20vbGVhcm4vZGVhbHMvb2ZmZXJzsQlLgymyqIGNPsgJAMgJigKhC4BYTxeL0jdlugs9CAEQBRgEIAgoATAaQAFIAFgBYABoAHABiAEAmAEBogEICgCoAgHYAgKoAQHYAQOAAgGIAgW6AwV2aWRsc9ALEuALAaIMM2IUChJjb20uY29tY2FzdC5jaW0ueDJqFgoUY29tLnhmaW5pdHkuY2xvdWR0dnJ4AIgBANIMAhAB2gwmCgsQgJnVr_H5tILwARICAQMaDRiq6PTWWCCa-faK4AVAAUoCEB-aDQESqg0CVVPIDQHSDc4EaHR0cHM6Ly9hZC5kb3VibGVjbGljay5uZXQvZGRtL3RyYWNrY2xrL044NjY3LjM5ODAxNzVJTl9IT1VTRV9DTVNURFYzL0IzNDc0NzA4MC40MzQ3MTM0ODc7ZGNfdHJrX2FpZD02MjgzNDA4MDY7ZGNfdHJrX2NpZD02MTY0OTY4NztkY19kYm1fdG9rZW49QU9qZUxORUFBQUE2Q2pRS0RBZ0FGUUFBQUFBZEFBQUFBQklNQ0FBVkFBQUFBQjBBQUFBQUloUUlxdWowMWxpb0F0S0x0cDBDc0FMNGo5SG9BMEE3RUpiRVB2NE9MQ1B6bGFpR1BTTllYOFQ2WllFPTtkY19sYXQ9O2RjX3JkaWQ9O3RhZ19mb3JfY2hpbGRfZGlyZWN0ZWRfdHJlYXRtZW50PTt0ZnVhPTtsdGQ9O2RjX3Rkdj0xOztkY190cmFuc3BhcmVudD0xO2RjX3J1aT0xO2RjX2Vwcz1BSGFzOGNBZEVZUE9GZlpMLUtRbUFaRkxaTjh4c1U2YWg1U2RrS1U3S1Bxcnc3U3JnbHJkbFlicVppWktCaXUwQzl2UUZUUGtqajB4czBXM2FIcGJBUTtkY19wdWJpZD02P2h0dHBzOi8vd3d3LnhmaW5pdHkuY29tL2xlYXJuL2RlYWxzL29mZmVycz9DTVA9QkFDOkRFTS0zNDc0NzA4MC02NTIyMjg2LTQzNDcxMzQ4Ny02MTY0OTY4NyZnYWRfc291cmNlPTImZ2FkX2NhbXBhaWduaWQ9MjM4MDQ1ODkwOTiwE7PT4CK4E____________wGIFAWwFAHAFYGAgEDQFQHYFQGYFgGoFgHiFgIIAYAXAYoXGAgDGAEgASgBMAE4AUABSAFQAVgBYAJoAaAXAakXfdZpm_pE6fe6FwYoADAAOAHQGAHwGAHCGQIIAQ&ase=2&gclid=EAIaIQobChMImP_pr42xlQMVIernAx3gWzuuEAEYASAAEgKo_PD_BwE&num=1&cid=CAASqwHkaJlZt8_8uIlRQ_YHYZWtQyF2dg0HR0b3LgVVU0dU7fcOC8D0N-ErLvCcpD5lVebsWW4aGo1t6meJt7-RdTGETy-73WMvJzWRv4I5_cbdKmTwPVafrIm3XNKv81m3krkD4XKJvc59YYQbsFY3guvtFM_qXsa0bXXNBKgSVPrRjizjbbc005mdl7qLm8Xfeu7-PncOlPgrZMOa2tFPrPRfrz2VnpZbf0GGaxw&sig=AOD64_0sZSMM63glJvKFbcywTTy1crajIw&ms=%5BCLICK_MS%5D&nb=7&nx=%5BNX%5D&ny=%5BNY%5D&dim=%5BDIM%5D)
+
+赞助商广告
+
+Xfinity
+
+[
+
+Learn more
+
+](https://www.googleadservices.com/pagead/aclk?sa=L&ai=C2hBIttVEapjMCKHUn88P4Lft8QrxyJPnhgHttqLn4hVkEAEgAGDJnvmGyKOgGYIBF2NhLXB1Yi02MjE5ODExNzQ3MDQ5MzcxoAHr_e3iAagDBMgDCqoEwANP0GcpsQqUg54Wb4yWHLHwIHLZeH0hSUV7DL77z1V8_5kPbUw_wX89n7VoH57tgw6nts2kQFYqACk1uIKK-bfvUb20RCdfST_E0mzZSQ31HOdHLakRQM8Zq_H3f5wU_4nty3LTGnJjlc_HH9_w-9d6UMdZLTh_nMEiMS2RNBZbzolKx6JY0z9mACau0RJ7vCRAvgTdIt2nukIttEnAtnbC5HxyrESqshUyRc7lmfcxy_7rDIiAC-F15_CM7NG4u3dEK3PCSM_hsHzSA2kmmouQUmMcO7PRXsjVMN1kgaiMKyaFKdUFAm1hCs1jRj1PY7nhkoWbl5CEOzoItmH_mz71BOxEf7OOa6zmEjnyq5abrkZ6WV7giLclfak44cUydeP_VHwGyz35l1SCoaPlD9q6yGMGJjunK3shINYVWq6mcfo0dnmu0CgpGtMdPsTi32oY-X7vSCRV_ZVwxt0itANaz43n7JbWejwOOeuFkJTNJQ_zHOlTSp5WlgylzPUtFeqRlJqm1_X_JOALf8L69PhMJicfkTaMwkA8YwYjZ4rqv1jDcZk62hArJ8QNfx4T4nEA5B8ubrm_E6xCgDFor4m3iAWq6PTWWJIFCggTaAJ40ou2nQKgBm6AB_2Bkp0CkAcEqAfywLECqAe4xLECqAfhtrECqAelz7ECqAfnnbECqAfonbECqAfvtbECqAfwtbECqAf507ECqAfJ2rECqAep4LECqAeECKgHptSxAqgHqNIbqAe2B6gHsdwbqAewm7ECqAeusbECqAf9srECqAfIz7ECqAfJz7ECqAfNx7ECqAfx0bECqAf81bECqAf71bECqAeM1rECqAeL1rECqAea4rECqAeb4rECqAed17ECqAed1LECqAeBxhuoB_yvsQKoB77ZsQKoB6vFG6gHt6GxAqgH1amxAqgH3rWxAqgH6rGxAqgHvrexAqgHmbWxAqgHhcGxAqgH66WxAqgHyqmxAtIILgiAQRABGF4yAoICOg-AY4DAgICAgICAAqqAgBBI2aDSNVAUWJDp6a-NsZUDYAHyCB9jYS15dC1ob3N0LXB1Yi05NzUwOTc4MjgyMDI2OTI3mgkqaHR0cHM6Ly93d3cueGZpbml0eS5jb20vbGVhcm4vZGVhbHMvb2ZmZXJzsQlLgymyqIGNPsgJAMgJigKhC4BYTxeL0jdlugs9CAEQBRgEIAgoATAaQAFIAFgBYABoAHABiAEAmAEBogEICgCoAgHYAgKoAQHYAQOAAgGIAgW6AwV2aWRsc9ALEuALAaIMM2IUChJjb20uY29tY2FzdC5jaW0ueDJqFgoUY29tLnhmaW5pdHkuY2xvdWR0dnJ4AIgBANIMAhAB2gwmCgsQgJnVr_H5tILwARICAQMaDRiq6PTWWCCa-faK4AVAAUoCEB-aDQESqg0CVVPIDQHSDc4EaHR0cHM6Ly9hZC5kb3VibGVjbGljay5uZXQvZGRtL3RyYWNrY2xrL044NjY3LjM5ODAxNzVJTl9IT1VTRV9DTVNURFYzL0IzNDc0NzA4MC40MzQ3MTM0ODc7ZGNfdHJrX2FpZD02MjgzNDA4MDY7ZGNfdHJrX2NpZD02MTY0OTY4NztkY19kYm1fdG9rZW49QU9qZUxORUFBQUE2Q2pRS0RBZ0FGUUFBQUFBZEFBQUFBQklNQ0FBVkFBQUFBQjBBQUFBQUloUUlxdWowMWxpb0F0S0x0cDBDc0FMNGo5SG9BMEE3RUpiRVB2NE9MQ1B6bGFpR1BTTllYOFQ2WllFPTtkY19sYXQ9O2RjX3JkaWQ9O3RhZ19mb3JfY2hpbGRfZGlyZWN0ZWRfdHJlYXRtZW50PTt0ZnVhPTtsdGQ9O2RjX3Rkdj0xOztkY190cmFuc3BhcmVudD0xO2RjX3J1aT0xO2RjX2Vwcz1BSGFzOGNBZEVZUE9GZlpMLUtRbUFaRkxaTjh4c1U2YWg1U2RrS1U3S1Bxcnc3U3JnbHJkbFlicVppWktCaXUwQzl2UUZUUGtqajB4czBXM2FIcGJBUTtkY19wdWJpZD02P2h0dHBzOi8vd3d3LnhmaW5pdHkuY29tL2xlYXJuL2RlYWxzL29mZmVycz9DTVA9QkFDOkRFTS0zNDc0NzA4MC02NTIyMjg2LTQzNDcxMzQ4Ny02MTY0OTY4NyZnYWRfc291cmNlPTImZ2FkX2NhbXBhaWduaWQ9MjM4MDQ1ODkwOTiwE7PT4CK4E____________wGIFAWwFAHAFYGAgEDQFQHYFQGYFgGoFgHiFgIIAYAXAYoXGAgDGAEgASgBMAE4AUABSAFQAVgBYAJoAaAXAakXfdZpm_pE6fe6FwYoADAAOAHQGAHwGAHCGQIIAQ&ase=2&gclid=EAIaIQobChMImP_pr42xlQMVIernAx3gWzuuEAEYASAAEgKo_PD_BwE&num=1&cid=CAASqwHkaJlZt8_8uIlRQ_YHYZWtQyF2dg0HR0b3LgVVU0dU7fcOC8D0N-ErLvCcpD5lVebsWW4aGo1t6meJt7-RdTGETy-73WMvJzWRv4I5_cbdKmTwPVafrIm3XNKv81m3krkD4XKJvc59YYQbsFY3guvtFM_qXsa0bXXNBKgSVPrRjizjbbc005mdl7qLm8Xfeu7-PncOlPgrZMOa2tFPrPRfrz2VnpZbf0GGaxw&sig=AOD64_0sZSMM63glJvKFbcywTTy1crajIw&ms=%5BCLICK_MS%5D&nb=8&nx=%5BNX%5D&ny=%5BNY%5D&dim=%5BDIM%5D)
+
+[
+
+3:40:48
+
+](https://www.youtube.com/watch?v=Q7AYc2kECDI)
+
+### [How to Actually Build Mobile Apps with AI in 2026 | A Complete Beginner's Tutorial](https://www.youtube.com/watch?v=Q7AYc2kECDI)
+
+JavaScript Mastery
+
+31万次观看 • 1个月前
+
+[
+
+2:13:31
+
+](https://www.youtube.com/watch?v=LbkO84MsmyM&pp=ugUEEgJ6aA%3D%3D)
+
+### [Sarah Paine｜印度之战（讲座＋访谈）](https://www.youtube.com/watch?v=LbkO84MsmyM&pp=ugUEEgJ6aA%3D%3D)
+
+Dwarkesh Patel
+
+514万次观看 • 1年前
+
+带配音
+
+[
+
+38:31
+
+](https://www.youtube.com/watch?v=B2482h_TNwg&pp=ugUEEgJlbg%3D%3D)
+
+### [The $200M Machine that Prints Microchips: The EUV Photolithography System](https://www.youtube.com/watch?v=B2482h_TNwg&pp=ugUEEgJlbg%3D%3D)
+
+Branch Education
+
+205万次观看 • 10个月前
+
+[
+
+1:03:03
+
+](https://www.youtube.com/watch?v=7ARBJQn6QkM&pp=0gcJCU4LAYcqIYzv)
+
+### [NVIDIA CEO Jensen Huang's Vision for the Future](https://www.youtube.com/watch?v=7ARBJQn6QkM&pp=0gcJCU4LAYcqIYzv)
+
+Cleo Abram
+
+509万次观看 • 1年前
+
+[
+
+55:00
+
+](https://www.youtube.com/watch?v=MiUHjLxm3V0&pp=ugUEEgJlbg%3D%3D)
+
+### [The World's Most Important Machine](https://www.youtube.com/watch?v=MiUHjLxm3V0&pp=ugUEEgJlbg%3D%3D)
+
+Veritasium
+
+3243万次观看 • 6个月前
+
+[
+
+3:35:37
+
+](https://www.youtube.com/watch?v=1-TZqOsVCNM)
+
+### [How to Get Rich](https://www.youtube.com/watch?v=1-TZqOsVCNM)
+
+Naval
+
+1241万次观看 • 6年前
+
+[
+
+25:48
+
+](https://www.youtube.com/watch?v=Oa0ZHfcalCM)
+
+### [What do tech pioneers think about the AI revolution? - The Engineers, BBC World Service](https://www.youtube.com/watch?v=Oa0ZHfcalCM)
+
+BBC World Service
+
+251万次观看 • 1年前
+
+[
+
+48:49
+
+](https://www.youtube.com/watch?v=vUWOhAs5rTs&pp=ugUEEgJlbg%3D%3D)
+
+### [Why Singaporeans Are Fleeing to Malaysia Every Weekend | AB Explained](https://www.youtube.com/watch?v=vUWOhAs5rTs&pp=ugUEEgJlbg%3D%3D)
+
+Asian Boss
+
+52万次观看 • 1个月前
+
+[
+
+2:05:16
+
+](https://www.youtube.com/watch?v=wQJlGHVmdrA&pp=ugUJEgd6aC1IYW5z)
+
+### [维生素D专家：通往痴呆最快的途径，以及关于阳光的巨大谎言！](https://www.youtube.com/watch?v=wQJlGHVmdrA&pp=ugUJEgd6aC1IYW5z)
+
+The Diary Of A CEO和MedCram - Medical Lectures Explained CLEARLY
+
+1405万次观看 • 11个月前
+
+带配音
+
+[
+
+3:53:53
+
+](https://www.youtube.com/watch?v=i_LwzRVP7bg)
+
+### [Machine Learning for Everybody – Full Course](https://www.youtube.com/watch?v=i_LwzRVP7bg)
+
+freeCodeCamp.org和Kylie Ying
+
+1010万次观看 • 3年前
+
+[
+
+17:43
+
+](https://www.youtube.com/watch?v=S3geK7xVDQU&pp=ugUEEgJlbg%3D%3D)
+
+### [How Micron’s Building Biggest U.S. Chip Fab, Despite China Ban](https://www.youtube.com/watch?v=S3geK7xVDQU&pp=ugUEEgJlbg%3D%3D)
+
+CNBC
+
+221万次观看 • 2年前
+
+[
+
+1:46:35
+
+](https://www.youtube.com/watch?v=Q6NpiIp-6WM&pp=ugUEEgJlbg%3D%3D)
+
+### [NestJS Full Course in 2026 | How Senior Engineers Build Backends with AI](https://www.youtube.com/watch?v=Q6NpiIp-6WM&pp=ugUEEgJlbg%3D%3D)
+
+JavaScript Mastery
+
+4.8万次观看 • 4天前
+
+最新
+
+[
+
+36:54
+
+](https://www.youtube.com/watch?v=RQWpF2Gb-gU&pp=ugUEEgJlbtIHCQlOCwGHKiGM7w%3D%3D)
+
+### [But what is quantum computing? (Grover's Algorithm)](https://www.youtube.com/watch?v=RQWpF2Gb-gU&pp=ugUEEgJlbtIHCQlOCwGHKiGM7w%3D%3D)
+
+3Blue1Brown
+
+367万次观看 • 1年前
+
+[
+
+2:12:33
+
+](https://www.youtube.com/watch?v=sFkR34AMPw8&pp=ugUJEgd6aC1IYW5z)
+
+### [赚钱专家：7,11,4 黑科技，把 $1 变成每月 $10K！- Daniel Priestley](https://www.youtube.com/watch?v=sFkR34AMPw8&pp=ugUJEgd6aC1IYW5z)
+
+The Diary Of A CEO
+
+486万次观看 • 1年前
+
+带配音
+
+[
+
+32:43
+
+](https://www.youtube.com/watch?v=bqE_ONRp3-k)
+
+### [Inside the Aussie start-up taking on the US hospital system | That's Business with Alan Kohler](https://www.youtube.com/watch?v=bqE_ONRp3-k)
+
+ABC News (Australia)
+
+1.8万次观看 • 5天前
+
+最新
+
+[
+
+31:12
+
+](https://www.youtube.com/watch?v=02YLwsCKUww&pp=ugUEEgJlbtIHCQlOCwGHKiGM7w%3D%3D)
+
+### [FULL DISCUSSION: Google's Demis Hassabis, Anthropic's Dario Amodei Debate the World After AGI | AI1G](https://www.youtube.com/watch?v=02YLwsCKUww&pp=ugUEEgJlbtIHCQlOCwGHKiGM7w%3D%3D)
+
+DRM News
+
+103万次观看 • 5个月前
+
+[
+
+47:40
+
+](https://www.youtube.com/watch?v=v1wZwxY3CMg&pp=ugUEEgJlbtIHCQlOCwGHKiGM7w%3D%3D)
+
+### [Inside Anthropic, the $965 Billion AI Juggernaut | The Circuit](https://www.youtube.com/watch?v=v1wZwxY3CMg&pp=ugUEEgJlbtIHCQlOCwGHKiGM7w%3D%3D)
+
+Bloomberg Originals
+
+222万次观看 • 2周前
+
+[
+
+1:04:30
+
+](https://www.youtube.com/watch?v=dQ8wVeJkvco&pp=sAQB)
+
+### [How Thoughts Become Things](https://www.youtube.com/watch?v=dQ8wVeJkvco&pp=sAQB)
+
+纪录片 • 2020
+
+免费（含广告）
+
+TV-PG
+
+[
+
+1:21:32
+
+](https://www.youtube.com/watch?v=siDkGU1uVHg&pp=ugUHEgVlbi1VUw%3D%3D)
+
+### [The Declaration of Independence and the Fight For America’s Future with Victor Davis Hanson](https://www.youtube.com/watch?v=siDkGU1uVHg&pp=ugUHEgVlbi1VUw%3D%3D)
+
+Hoover Institution
+
+7.9万次观看 • 1天前
+
+最新
+
+[
+
+20:39
+
+](https://www.youtube.com/watch?v=AOEr5FrW-lY)
+
+### [We Were Almost Entirely Wrong About China](https://www.youtube.com/watch?v=AOEr5FrW-lY)
+
+BZ Travel – Unfiltered Journeys
+
+63万次观看 • 3周前
+
+展开
+
+展开
+
+## 评论
