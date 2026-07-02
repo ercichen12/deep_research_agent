@@ -76,6 +76,139 @@ describe("Heavy console UI", () => {
     expect(screen.getByText("暂无研究过程日志。")).toBeInTheDocument();
   });
 
+  it("renders graph state summary for historical Graph Heavy inquiries", async () => {
+    const inquiry = fixtureInquiry();
+    inquiry.graphState = {
+      frame: {
+        taskKind: "find_person_company",
+        userGoal: inquiry.prompt,
+        deliverable: "最大可能候选人",
+        hardConstraints: [{ id: "role", label: "CEO founder senior leadership", kind: "hard", core: true }],
+        softPreferences: [{ id: "growth", label: "30% annual growth proxy", kind: "soft" }],
+        exclusionRules: [{ id: "no_solar", label: "not solar panels", kind: "exclusion" }]
+      },
+      status: "completed",
+      cycleIndex: 1,
+      actionCount: 1,
+      searchBatchCount: 1,
+      sourceCount: 1,
+      evidenceCount: 2,
+      candidates: [
+        {
+          id: "cand_1",
+          kind: "person_company",
+          name: "Grace Brown / Andromeda Robotics",
+          aliases: ["Grace Brown", "Andromeda Robotics"],
+          summary: "Evidence-backed candidate",
+          matchedConstraints: [{ constraintId: "role", status: "direct", evidenceIds: ["ev_1"] }],
+          missingConstraints: [{ constraintId: "growth", reason: "Exact growth missing", neededEvidence: ["annual report"] }],
+          score: 71,
+          confidence: "medium",
+          status: "ranked"
+        }
+      ],
+      evidenceMatrix: {
+        constraintIds: ["role", "growth"],
+        candidateIds: ["cand_1"],
+        cells: [
+          {
+            candidateId: "cand_1",
+            constraintId: "role",
+            status: "direct",
+            evidenceIds: ["ev_1"],
+            bestSourceUrls: ["https://example.com/a"],
+            rationale: "Direct CEO evidence",
+            updatedAt: "2026-07-02T00:00:00.000Z"
+          },
+          {
+            candidateId: "cand_1",
+            constraintId: "growth",
+            status: "missing",
+            evidenceIds: [],
+            bestSourceUrls: [],
+            rationale: "No exact growth source",
+            updatedAt: "2026-07-02T00:00:00.000Z"
+          }
+        ]
+      },
+      rejectedPaths: [],
+      evaluatorDecisions: [
+        {
+          id: "eval_1_finalize",
+          cycle: 1,
+          action: "finalize",
+          reason: "候选证据足够",
+          nextFocus: ["cand_1"],
+          unresolvedQuestions: ["缺少 growth 的直接证据"],
+          createdAt: "2026-07-02T00:00:00.000Z"
+        }
+      ],
+      recentSearchBatches: [
+        {
+          id: "batch_1",
+          actionId: "act_1",
+          cycle: 1,
+          queryCount: 1,
+          providerCalls: [
+            {
+              provider: "opencli",
+              engine: "google",
+              query: "Australian robotics AI hardware CEO founder interview",
+              status: "done",
+              resultCount: 30,
+              durationMs: 100,
+              artifactId: "search_1"
+            }
+          ],
+          dedupedResultCount: 30,
+          uniqueDomainCount: 12,
+          expectedSignalHits: ["CEO"],
+          officialOrPrimaryCount: 2,
+          candidateMentions: ["Grace Brown"],
+          quality: "strong"
+        }
+      ],
+      recentSources: [
+        {
+          sourceHash: "source_1",
+          title: "Andromeda Robotics Team",
+          url: "https://example.com/a",
+          provider: "opencli",
+          engine: "google",
+          status: "read",
+          readCharCount: 1200,
+          evidenceIds: ["ev_1"]
+        }
+      ],
+      updatedAt: "2026-07-02T00:00:00.000Z"
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes("/api/health")) {
+          return jsonResponse({ ok: true, configuredModel: "test-model", baseUrl: "https://relay.example", searchProvider: { provider: "relay" } });
+        }
+        if (url.includes(`/api/inquiries/${inquiry.id}`)) {
+          return jsonResponse(inquiry);
+        }
+        return jsonResponse({ inquiries: [inquiry] });
+      })
+    );
+
+    render(<Home />);
+
+    expect(await screen.findByText("Graph Research")).toBeInTheDocument();
+    expect(screen.getByText("find_person_company")).toBeInTheDocument();
+    expect(screen.getByText("Search Ledger")).toBeInTheDocument();
+    expect(screen.getAllByText("opencli · google").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Candidate Pool")).toBeInTheDocument();
+    expect(screen.getByText("Grace Brown / Andromeda Robotics")).toBeInTheDocument();
+    expect(screen.getByText("Evidence Matrix")).toBeInTheDocument();
+    expect(screen.getByText("role")).toBeInTheDocument();
+    expect(screen.getAllByText("direct").length).toBeGreaterThanOrEqual(1);
+  });
+
   it("renders duplicate research process queries without React key warnings", async () => {
     const inquiry = fixtureInquiry();
     const duplicateStep = inquiry.turns[0].runs[0].agentReports[0].researchSteps[1];

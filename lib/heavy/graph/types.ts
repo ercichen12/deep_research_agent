@@ -398,7 +398,8 @@ export function normalizeGraphBudget(input: Record<string, unknown> = {}, env: R
 
 export function normalizeResearchFrame(input: unknown, budget: GraphBudgetState = DEFAULT_GRAPH_BUDGET): ResearchFrame {
   const item = objectRecord(input);
-  const taskKind = taskKinds.has(text(item.taskKind)) ? (text(item.taskKind) as TaskKind) : "general_research";
+  const taskKindText = text(item.taskKind);
+  const taskKind = taskKinds.has(taskKindText as TaskKind) ? (taskKindText as TaskKind) : "general_research";
   const userGoal = text(item.userGoal) || text(item.prompt) || "Research the user's question.";
   const deliverable = text(item.deliverable) || "Evidence-backed markdown report";
   const hardConstraints = normalizeConstraints(item.hardConstraints, "hard");
@@ -911,12 +912,12 @@ function normalizePriority(value: unknown): "low" | "medium" | "high" {
 
 function normalizeSourceType(value: unknown): EvidenceSourceType {
   const sourceType = text(value);
-  return evidenceSourceTypes.has(sourceType) ? (sourceType as EvidenceSourceType) : "other";
+  return evidenceSourceTypes.has(sourceType as EvidenceSourceType) ? (sourceType as EvidenceSourceType) : "other";
 }
 
 function normalizeEvidenceStrength(value: unknown): EvidenceStrength {
   const strength = text(value);
-  return evidenceStrengths.has(strength) ? (strength as EvidenceStrength) : "weak";
+  return evidenceStrengths.has(strength as EvidenceStrength) ? (strength as EvidenceStrength) : "weak";
 }
 
 function normalizeConfidence(value: unknown): "low" | "medium" | "high" {

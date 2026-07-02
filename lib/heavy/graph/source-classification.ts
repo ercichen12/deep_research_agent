@@ -6,6 +6,7 @@ type EvidenceSourceInput = {
   title?: string;
   candidateDomains?: string[];
   hasFullText?: boolean;
+  fullText?: string;
 };
 
 type SearchProviderCall = {

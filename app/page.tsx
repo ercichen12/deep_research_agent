@@ -3,6 +3,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useEffect, useMemo, useState } from "react";
+import type { GraphStateSummary } from "@/lib/heavy/graph/types";
 import type { HeavyEvent, Inquiry, ResearchRun, Turn } from "@/lib/heavy/types";
 
 const SAMPLE_PROMPT =
@@ -189,6 +190,7 @@ export default function Home() {
         </header>
 
         <StageBar turn={activeTurn} events={events} />
+        {activeInquiry?.graphState ? <GraphStatePanel graphState={activeInquiry.graphState} /> : null}
 
         <div className="content-grid">
           <section className="workstream">
@@ -206,7 +208,7 @@ export default function Home() {
               <span>{events.length} 条</span>
             </div>
             <div className="event-list">
-              {events.slice(-40).map((event, index) => (
+              {events.map((event, index) => (
                 <EventCard event={event} key={`${event.type}-${index}`} />
               ))}
               {events.length === 0 ? <p className="muted">运行时会追加 NDJSON 事件。</p> : null}
@@ -276,7 +278,163 @@ function EventCard({ event }: { event: HeavyEvent }) {
           {event.log.message ? <small>{event.log.message}</small> : null}
         </>
       ) : null}
+      {event.type === "search_batch_reported" ? (
+        <>
+          <span>
+            {event.batch.quality} · {event.batch.dedupedResultCount} results · {event.batch.uniqueDomainCount} domains
+          </span>
+          {event.batch.providerCalls.map((call, index) => (
+            <small key={`${event.batch.id}-provider-${index}`}>
+              {formatSearchProvider(call.provider, call.engine)} · {call.status} · {call.resultCount} results · {call.query}
+            </small>
+          ))}
+        </>
+      ) : null}
+      {event.type === "source_read" ? (
+        <>
+          <span>{formatSearchProvider(event.source.provider, event.source.engine)}</span>
+          <a href={event.source.url} rel="noreferrer" target="_blank">
+            {event.source.title}
+          </a>
+          <small>
+            {event.source.status}
+            {typeof event.source.readCharCount === "number" ? ` · ${event.source.readCharCount} chars` : ""}
+          </small>
+        </>
+      ) : null}
+      {event.type === "candidate_promoted" ? (
+        <>
+          <span>{event.candidate.name}</span>
+          <small>
+            {event.candidate.status} · score {event.candidate.score} · {event.reason}
+          </small>
+        </>
+      ) : null}
+      {event.type === "state_evaluated" ? (
+        <>
+          <span>{event.decision.action}</span>
+          <small>{event.decision.reason}</small>
+        </>
+      ) : null}
     </article>
+  );
+}
+
+function GraphStatePanel({ graphState }: { graphState: GraphStateSummary }) {
+  return (
+    <section className="graph-panel">
+      <div className="section-head">
+        <h2>Graph Research</h2>
+        <span>
+          Cycle {graphState.cycleIndex} · {graphState.status}
+        </span>
+      </div>
+
+      <div className="graph-metrics">
+        <Metric label="任务类型" value={graphState.frame.taskKind} />
+        <Metric label="Actions" value={String(graphState.actionCount)} />
+        <Metric label="Search Batches" value={String(graphState.searchBatchCount)} />
+        <Metric label="Sources" value={String(graphState.sourceCount)} />
+        <Metric label="Evidence" value={String(graphState.evidenceCount)} />
+      </div>
+
+      <div className="graph-grid">
+        <section className="graph-card">
+          <h3>Search Ledger</h3>
+          {graphState.recentSearchBatches.map((batch) => (
+            <article key={batch.id}>
+              <strong>{batch.quality}</strong>
+              <span>
+                {batch.dedupedResultCount} results · {batch.uniqueDomainCount} domains · {batch.officialOrPrimaryCount} primary
+              </span>
+              {batch.providerCalls.map((call, index) => (
+                <small key={`${batch.id}-${index}`}>
+                  {formatSearchProvider(call.provider, call.engine)} · {call.status} · {call.resultCount} results · {call.query}
+                </small>
+              ))}
+            </article>
+          ))}
+          {graphState.recentSearchBatches.length === 0 ? <p className="muted">暂无搜索批次。</p> : null}
+        </section>
+
+        <section className="graph-card">
+          <h3>Source Ledger</h3>
+          {graphState.recentSources.map((source) => (
+            <article key={source.sourceHash}>
+              <strong>{source.title}</strong>
+              <span>{source.engine ? `${source.provider} / ${source.engine}` : source.provider}</span>
+              <a href={source.url} rel="noreferrer" target="_blank">
+                {source.url}
+              </a>
+              <small>
+                {source.status}
+                {typeof source.readCharCount === "number" ? ` · ${source.readCharCount} chars` : ""}
+              </small>
+            </article>
+          ))}
+          {graphState.recentSources.length === 0 ? <p className="muted">暂无网页来源。</p> : null}
+        </section>
+
+        <section className="graph-card">
+          <h3>Candidate Pool</h3>
+          {graphState.candidates.map((candidate) => (
+            <article key={candidate.id}>
+              <strong>{candidate.name}</strong>
+              <span>
+                {candidate.status} · {candidate.confidence} · {candidate.score}/100
+              </span>
+              <p>{candidate.summary}</p>
+              {candidate.missingConstraints.length > 0 ? <small>缺口：{candidate.missingConstraints.map((item) => item.constraintId).join(", ")}</small> : null}
+            </article>
+          ))}
+          {graphState.candidates.length === 0 ? <p className="muted">暂无候选。</p> : null}
+        </section>
+
+        <section className="graph-card">
+          <h3>Evidence Matrix</h3>
+          {graphState.evidenceMatrix.cells.length > 0 ? (
+            <div className="matrix-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>candidate</th>
+                    <th>constraint</th>
+                    <th>status</th>
+                    <th>source</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {graphState.evidenceMatrix.cells.map((cell) => (
+                    <tr key={`${cell.candidateId}-${cell.constraintId}`}>
+                      <td>{cell.candidateId}</td>
+                      <td>{cell.constraintId}</td>
+                      <td>{cell.status}</td>
+                      <td>{cell.bestSourceUrls[0] ?? "未找到"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="muted">暂无证据矩阵。</p>
+          )}
+        </section>
+
+        <section className="graph-card">
+          <h3>Decision Timeline</h3>
+          {graphState.evaluatorDecisions.map((decision) => (
+            <article key={decision.id}>
+              <strong>
+                Cycle {decision.cycle} · {decision.action}
+              </strong>
+              <p>{decision.reason}</p>
+              {decision.unresolvedQuestions.length > 0 ? <small>{decision.unresolvedQuestions.join(", ")}</small> : null}
+            </article>
+          ))}
+          {graphState.evaluatorDecisions.length === 0 ? <p className="muted">暂无决策。</p> : null}
+        </section>
+      </div>
+    </section>
   );
 }
 
@@ -509,7 +667,7 @@ function ResearchProcess({ report }: { report: ResearchRun["agentReports"][numbe
               ) : null}
               <div className="research-step-meta">
                 {step.decision ? <span>{step.decision}</span> : null}
-                {step.provider ? <span>{formatSearchProvider(step.provider, step.engine)}</span> : null}
+                {step.provider ? <span>provider: {formatSearchProvider(step.provider, step.engine)}</span> : null}
                 {typeof step.resultCount === "number" ? <span>{step.resultCount} results</span> : null}
               </div>
             </article>

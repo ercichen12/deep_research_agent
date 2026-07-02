@@ -86,12 +86,17 @@ function scoreSources(sources: SourceSummary[], evidenceIds: string[]): number {
 
 function createMatchedConstraints(cells: EvidenceMatrixCell[]): ConstraintMatch[] {
   return cells
-    .filter((cell) => cell.status === "direct" || cell.status === "proxy" || cell.status === "contradicted")
-    .map((cell) => ({
-      constraintId: cell.constraintId,
-      status: cell.status === "contradicted" ? "contradicted" : cell.status,
-      evidenceIds: cell.evidenceIds
-    }));
+    .map((cell) => {
+      if (cell.status !== "direct" && cell.status !== "proxy" && cell.status !== "contradicted") {
+        return null;
+      }
+      return {
+        constraintId: cell.constraintId,
+        status: cell.status,
+        evidenceIds: cell.evidenceIds
+      } satisfies ConstraintMatch;
+    })
+    .filter((match): match is ConstraintMatch => Boolean(match));
 }
 
 function createMissingConstraints(frame: ResearchFrame, candidateId: string, matrix: EvidenceMatrix): MissingConstraint[] {
@@ -129,9 +134,6 @@ function scoreConfidence(input: {
 function scoreStatus(input: { score: number; hasExclusion: boolean; hardEnough: boolean }): Candidate["status"] {
   if (input.hasExclusion) {
     return "rejected";
-  }
-  if (input.score >= 80 && input.hardEnough) {
-    return "ranked";
   }
   if (input.score >= 40 && input.hardEnough) {
     return "promoted";

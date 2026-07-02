@@ -1,0 +1,42 @@
+import { NextResponse } from "next/server";
+import { loadGraphState, loadInquiry, loadSearchBatchArtifact, type HeavyStorageOptions } from "@/lib/heavy/storage";
+
+export const dynamic = "force-dynamic";
+
+type RouteContext = {
+  params: { id: string; batchId: string } | Promise<{ id: string; batchId: string }>;
+};
+
+export function createSearchBatchArtifactGetHandler(options: HeavyStorageOptions = {}) {
+  return async function GET(_request: Request, context: RouteContext) {
+    const params = await context.params;
+    const inquiry = await loadInquiry(params.id, options);
+    if (!inquiry) {
+      return NextResponse.json({ message: "Inquiry not found" }, { status: 404 });
+    }
+
+    const graphState = await loadLatestGraphStateForInquiry(inquiry.turns.map((turn) => turn.id), options);
+    if (!graphState?.searchLedger.some((batch) => batch.id === params.batchId)) {
+      return NextResponse.json({ message: "Artifact not found" }, { status: 404 });
+    }
+
+    const artifact = await loadSearchBatchArtifact(params.batchId, options);
+    if (!artifact || artifact.inquiryId !== inquiry.id) {
+      return NextResponse.json({ message: "Artifact not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(artifact);
+  };
+}
+
+async function loadLatestGraphStateForInquiry(turnIds: string[], options: HeavyStorageOptions) {
+  for (const turnId of [...turnIds].reverse()) {
+    const state = await loadGraphState(turnId, options);
+    if (state) {
+      return state;
+    }
+  }
+  return null;
+}
+
+export const GET = createSearchBatchArtifactGetHandler();

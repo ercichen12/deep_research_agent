@@ -192,7 +192,8 @@ button {
 .stage-bar,
 .workstream,
 .event-panel,
-.final-section {
+.final-section,
+.graph-panel {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -263,8 +264,96 @@ button {
 
 .workstream,
 .event-panel,
-.final-section {
+.final-section,
+.graph-panel {
   padding: 16px;
+}
+
+.graph-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.graph-metrics {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.graph-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.graph-card {
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+}
+
+.graph-card h3 {
+  font-size: 14px;
+  margin: 0;
+}
+
+.graph-card article {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 9px;
+}
+
+.graph-card strong,
+.graph-card span,
+.graph-card small,
+.graph-card p,
+.graph-card a {
+  overflow-wrap: anywhere;
+}
+
+.graph-card span {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.graph-card small,
+.graph-card p {
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.graph-card a {
+  color: var(--accent);
+  font-size: 12px;
+}
+
+.matrix-table {
+  overflow-x: auto;
+}
+
+.matrix-table table {
+  border-collapse: collapse;
+  min-width: 560px;
+  width: 100%;
+}
+
+.matrix-table th,
+.matrix-table td {
+  border: 1px solid var(--border);
+  font-size: 12px;
+  padding: 7px;
+  text-align: left;
+  vertical-align: top;
 }
 
 .run-panel {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { loadInquiry, type HeavyStorageOptions } from "@/lib/heavy/storage";
+import { loadGraphState, loadInquiry, type HeavyStorageOptions } from "@/lib/heavy/storage";
+import { summarizeGraphState } from "@/lib/heavy/graph/types";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,12 @@ export function createInquiryByIdGetHandler(options: HeavyStorageOptions = {}) {
 
     if (!inquiry) {
       return NextResponse.json({ message: "Inquiry not found" }, { status: 404 });
+    }
+
+    const latestTurn = inquiry.turns.at(-1);
+    const graphState = latestTurn ? await loadGraphState(latestTurn.id, options) : null;
+    if (graphState) {
+      inquiry.graphState = summarizeGraphState(graphState);
     }
 
     return NextResponse.json(inquiry);
