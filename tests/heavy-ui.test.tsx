@@ -379,6 +379,74 @@ describe("Heavy console UI", () => {
     expect(consoleError.mock.calls.some((call) => call.join(" ").includes("Encountered two children with the same key"))).toBe(false);
   });
 
+  it("renders duplicate graph sources without React key warnings", async () => {
+    const inquiry = fixtureInquiry();
+    inquiry.graphState = {
+      frame: {
+        taskKind: "data_workflow_design",
+        userGoal: inquiry.prompt,
+        deliverable: "HS8542 workflow",
+        hardConstraints: [{ id: "data_cleaning", label: "HS8542 customs data cleaning", kind: "hard", core: true }],
+        softPreferences: [],
+        exclusionRules: []
+      },
+      status: "running",
+      cycleIndex: 2,
+      actionCount: 3,
+      searchBatchCount: 2,
+      sourceCount: 2,
+      evidenceCount: 0,
+      candidates: [],
+      evidenceMatrix: { constraintIds: ["data_cleaning"], candidateIds: [], cells: [] },
+      rejectedPaths: [],
+      evaluatorDecisions: [],
+      recentSearchBatches: [],
+      recentSources: [
+        {
+          sourceHash: "duplicate_source",
+          title: "WCO Data Model",
+          url: "https://www.wcoomd.org/datamodel",
+          provider: "opencli",
+          engine: "duckduckgo",
+          status: "read",
+          readCharCount: 3000,
+          evidenceIds: []
+        },
+        {
+          sourceHash: "duplicate_source",
+          title: "WCO Data Model",
+          url: "https://www.wcoomd.org/datamodel",
+          provider: "opencli",
+          engine: "duckduckgo",
+          status: "read",
+          readCharCount: 3000,
+          evidenceIds: []
+        }
+      ],
+      updatedAt: "2026-07-02T00:00:00.000Z"
+    };
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes("/api/health")) {
+          return jsonResponse({ ok: true, configuredModel: "test-model", baseUrl: "https://relay.example", searchProvider: { provider: "relay" } });
+        }
+        if (url.includes(`/api/inquiries/${inquiry.id}`)) {
+          return jsonResponse(inquiry);
+        }
+        return jsonResponse({ inquiries: [inquiry] });
+      })
+    );
+
+    render(<Home />);
+
+    expect(await screen.findByText("Source Ledger")).toBeInTheDocument();
+    expect(screen.getAllByText("WCO Data Model")).toHaveLength(1);
+    expect(consoleError.mock.calls.some((call) => call.join(" ").includes("Encountered two children with the same key"))).toBe(false);
+  });
+
   it("renders live stream search event details so a running click does not look idle", async () => {
     const inquiry = fixtureInquiry();
     inquiry.status = "running";

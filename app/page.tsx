@@ -360,6 +360,7 @@ function EventCard({ event }: { event: HeavyEvent }) {
 function GraphStatePanel({ graphState, inquiryId }: { graphState: GraphStateSummary; inquiryId: string }) {
   const [searchArtifacts, setSearchArtifacts] = useState<Record<string, ArtifactLoadState<SearchBatchArtifact>>>({});
   const [sourceArtifacts, setSourceArtifacts] = useState<Record<string, ArtifactLoadState<SourceArtifact>>>({});
+  const recentSources = useMemo(() => dedupeGraphSources(graphState.recentSources), [graphState.recentSources]);
 
   async function loadSearchArtifact(batchId: string) {
     const existing = searchArtifacts[batchId];
@@ -447,7 +448,7 @@ function GraphStatePanel({ graphState, inquiryId }: { graphState: GraphStateSumm
 
         <section className="graph-card">
           <h3>Source Ledger</h3>
-          {graphState.recentSources.map((source) => (
+          {recentSources.map((source) => (
             <article key={source.sourceHash}>
               <strong>{source.title}</strong>
               <span>{source.engine ? `${source.provider} / ${source.engine}` : source.provider}</span>
@@ -464,7 +465,7 @@ function GraphStatePanel({ graphState, inquiryId }: { graphState: GraphStateSumm
               <SourceArtifactPanel state={sourceArtifacts[source.sourceHash] ?? { status: "idle" }} />
             </article>
           ))}
-          {graphState.recentSources.length === 0 ? <p className="muted">暂无网页来源。</p> : null}
+          {recentSources.length === 0 ? <p className="muted">暂无网页来源。</p> : null}
         </section>
 
         <section className="graph-card">
@@ -528,6 +529,14 @@ function GraphStatePanel({ graphState, inquiryId }: { graphState: GraphStateSumm
       </div>
     </section>
   );
+}
+
+function dedupeGraphSources(sources: GraphStateSummary["recentSources"]): GraphStateSummary["recentSources"] {
+  const byHash = new Map<string, GraphStateSummary["recentSources"][number]>();
+  for (const source of sources) {
+    byHash.set(source.sourceHash, source);
+  }
+  return [...byHash.values()];
 }
 
 function SearchArtifactPanel({ state }: { state: ArtifactLoadState<SearchBatchArtifact> }) {
