@@ -41,6 +41,8 @@ button {
   display: grid;
   grid-template-columns: 380px minmax(0, 1fr);
   min-height: 100vh;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .heavy-sidebar {
@@ -49,6 +51,7 @@ button {
   display: grid;
   grid-template-rows: auto auto 1fr;
   gap: 18px;
+  min-width: 0;
   padding: 22px;
 }
 
@@ -194,6 +197,7 @@ button {
 .heavy-main {
   display: grid;
   gap: 18px;
+  min-width: 0;
   padding: 22px;
 }
 
@@ -269,12 +273,14 @@ button {
   display: grid;
   gap: 18px;
   grid-template-columns: minmax(0, 1fr) 300px;
+  min-width: 0;
 }
 
 .workstream,
 .event-panel,
 .final-section,
 .graph-panel {
+  min-width: 0;
   padding: 16px;
 }
 
@@ -413,6 +419,7 @@ button {
   border: 1px solid var(--border);
   border-radius: 8px;
   margin-top: 12px;
+  min-width: 0;
   overflow: hidden;
 }
 
@@ -445,6 +452,7 @@ button {
 .subsection {
   display: grid;
   gap: 10px;
+  min-width: 0;
   padding: 14px;
 }
 
@@ -473,6 +481,7 @@ button {
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 8px;
+  min-width: 0;
   padding: 12px;
 }
 
@@ -493,6 +502,11 @@ button {
   color: var(--muted);
   line-height: 1.6;
   margin: 0;
+}
+
+.task-card strong,
+.task-card span {
+  overflow-wrap: anywhere;
 }
 
 .agent-report {
