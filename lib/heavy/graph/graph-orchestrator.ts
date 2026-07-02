@@ -48,7 +48,7 @@ export async function startGraphHeavyInquiry(prompt: string, options: RunGraphHe
   const { inquiry, turn } = await createInquiry(prompt, { rootDir: options.rootDir });
   const completion = runExistingGraphInquiry(inquiry.id, turn.id, options);
 
-  if (options.awaitCompletion !== false) {
+  if (options.awaitCompletion) {
     await completion;
   } else {
     completion.catch(() => undefined);
@@ -88,11 +88,15 @@ export async function runExistingGraphInquiry(inquiryId: string, turnId: string,
 
       const actions = planGraphActions(state);
       state.actions = actions;
+      state.updatedAt = new Date().toISOString();
+      await persistGraphState(inquiry, state, options);
       await appendTurnEvent({ type: "actions_planned", inquiryId, turnId, cycle, actions, timestamp: new Date().toISOString() }, options);
 
       for (const action of actions) {
         await appendTurnEvent({ type: "action_started", inquiryId, turnId, cycle, action, timestamp: new Date().toISOString() }, options);
         state.budgets.actionsUsed += 1;
+        state.updatedAt = new Date().toISOString();
+        await persistGraphState(inquiry, state, options);
         if (action.type === "search_web") {
           await runSearchStep(state, action, provider, options);
         }

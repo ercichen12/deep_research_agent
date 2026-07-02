@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 type InquiryStartService = {
-  start: (prompt: string, options?: { budget?: Record<string, unknown> }) => Promise<{ inquiryId: string; turnId: string }>;
+  start: (prompt: string, options?: { budget?: Record<string, unknown>; awaitCompletion?: boolean }) => Promise<{ inquiryId: string; turnId: string }>;
 };
 
 function defaultInquiryStartService(): InquiryStartService {
@@ -28,7 +28,8 @@ export function createInquiryPostHandler(service: InquiryStartService = defaultI
       }
 
       const result = await service.start(prompt, {
-        budget: normalizeBudget(body)
+        budget: normalizeBudget(body),
+        awaitCompletion: false
       });
       return NextResponse.json(result);
     } catch (error) {

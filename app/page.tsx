@@ -2,7 +2,7 @@
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { GraphStateSummary, SearchBatchArtifact, SourceArtifact } from "@/lib/heavy/graph/types";
 import type { HeavyEvent, Inquiry, ResearchRun, Turn } from "@/lib/heavy/types";
 
@@ -31,7 +31,7 @@ export default function Home() {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [activeInquiryId, setActiveInquiryId] = useState("");
   const [activeInquiry, setActiveInquiry] = useState<Inquiry | null>(null);
-  const [events, setEvents] = useState<HeavyEvent[]>([]);
+  const [eventsByInquiry, setEventsByInquiry] = useState<Record<string, HeavyEvent[]>>({});
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState("");
 
@@ -40,14 +40,8 @@ export default function Home() {
     void refreshInquiries();
   }, []);
 
-  useEffect(() => {
-    if (!activeInquiryId) {
-      return;
-    }
-    void loadInquiry(activeInquiryId);
-  }, [activeInquiryId]);
-
   const activeTurn = activeInquiry?.turns.at(-1) ?? null;
+  const events = activeInquiryId ? (eventsByInquiry[activeInquiryId] ?? []) : [];
   const finalReport = activeTurn?.finalReport ?? null;
   const statusText = activeInquiry ? statusLabel(activeInquiry.status) : "未选择";
   const elapsed = activeTurn ? formatElapsed(activeTurn.startedAt ?? activeTurn.createdAt, activeTurn.completedAt) : "-";
@@ -81,19 +75,19 @@ export default function Home() {
     setActiveInquiryId((current) => current || items[0]?.id || "");
   }
 
-  async function loadInquiry(id: string) {
+  const loadInquiry = useCallback(async (id: string): Promise<Inquiry | null> => {
     const response = await fetch(`/api/inquiries/${id}`, { cache: "no-store" });
     if (!response.ok) {
-      return;
+      return null;
     }
     const data = (await response.json()) as Inquiry;
     setActiveInquiry(data);
-  }
+    return data;
+  }, []);
 
   async function startHeavyInquiry() {
     setIsRunning(true);
     setError("");
-    setEvents([]);
 
     try {
       const response = await fetch("/api/inquiries", {
@@ -107,7 +101,6 @@ export default function Home() {
       }
 
       setActiveInquiryId(data.inquiryId);
-      await consumeInquiryStream(data.inquiryId);
       await refreshInquiries();
       await loadInquiry(data.inquiryId);
     } catch (caught) {
@@ -117,17 +110,21 @@ export default function Home() {
     }
   }
 
-  async function consumeInquiryStream(inquiryId: string) {
-    const response = await fetch(`/api/inquiries/${inquiryId}/stream`, { cache: "no-store" });
+  const consumeInquiryStream = useCallback(async (inquiryId: string, signal?: AbortSignal) => {
+    const response = await fetch(`/api/inquiries/${inquiryId}/stream`, { cache: "no-store", signal });
     if (!response.ok || !response.body) {
       return;
     }
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
+    const nextEvents: HeavyEvent[] = [];
 
     while (true) {
       const { value, done } = await reader.read();
+      if (signal?.aborted) {
+        break;
+      }
       if (done) {
         break;
       }
@@ -137,12 +134,34 @@ export default function Home() {
       for (const line of lines) {
         const trimmed = line.trim();
         if (trimmed) {
-          setEvents((current) => [...current, JSON.parse(trimmed) as HeavyEvent]);
+          nextEvents.push(JSON.parse(trimmed) as HeavyEvent);
         }
       }
+      setEventsByInquiry((current) => ({ ...current, [inquiryId]: [...nextEvents] }));
       await loadInquiry(inquiryId);
     }
-  }
+  }, [loadInquiry]);
+
+  useEffect(() => {
+    if (!activeInquiryId) {
+      return;
+    }
+    const controller = new AbortController();
+
+    void (async () => {
+      const inquiry = await loadInquiry(activeInquiryId);
+      if (!inquiry || inquiry.status === "completed" || inquiry.status === "failed") {
+        return;
+      }
+      await consumeInquiryStream(activeInquiryId, controller.signal).catch((caught) => {
+        if (!controller.signal.aborted) {
+          setError(caught instanceof Error ? caught.message : "事件流读取失败");
+        }
+      });
+    })();
+
+    return () => controller.abort();
+  }, [activeInquiryId, consumeInquiryStream, loadInquiry]);
 
   return (
     <main className="heavy-shell">
