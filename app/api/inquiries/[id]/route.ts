@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { loadGraphState, loadInquiry, type HeavyStorageOptions } from "@/lib/heavy/storage";
 import { summarizeGraphState } from "@/lib/heavy/graph/types";
+import { applyGraphSummaryStaleMeta, applyInquiryStaleMeta, deriveStaleGraphMeta } from "@/lib/heavy/graph/stale";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,9 @@ export function createInquiryByIdGetHandler(options: HeavyStorageOptions = {}) {
     const latestTurn = inquiry.turns.at(-1);
     const graphState = latestTurn ? await loadGraphState(latestTurn.id, options) : null;
     if (graphState) {
-      inquiry.graphState = summarizeGraphState(graphState);
+      const staleMeta = deriveStaleGraphMeta({ inquiry, turn: latestTurn, state: graphState });
+      inquiry.graphState = applyGraphSummaryStaleMeta(summarizeGraphState(graphState), staleMeta);
+      applyInquiryStaleMeta(inquiry, staleMeta);
     }
 
     return NextResponse.json(inquiry);

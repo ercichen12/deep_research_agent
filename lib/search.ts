@@ -118,12 +118,47 @@ function normalizeResultUrl(rawUrl: string): string {
     const wrappedUrl = parsed.searchParams.get("uddg");
     if (wrappedUrl) {
       url = decodeURIComponent(wrappedUrl);
+    } else if (isBingRedirectUrl(parsed)) {
+      url = decodeBingRedirectUrl(parsed) ?? url;
     }
   } catch {
     return "";
   }
 
   return url;
+}
+
+function isBingRedirectUrl(url: URL): boolean {
+  return url.hostname.toLowerCase().endsWith("bing.com") && url.pathname.startsWith("/ck/");
+}
+
+function decodeBingRedirectUrl(url: URL): string | null {
+  const wrappedUrl = url.searchParams.get("u");
+  if (!wrappedUrl) {
+    return null;
+  }
+
+  const decoded = decodeBingBase64Url(wrappedUrl.startsWith("a1") ? wrappedUrl.slice(2) : wrappedUrl);
+  return decoded && isExternalHttpUrl(decoded) ? decoded : null;
+}
+
+function decodeBingBase64Url(value: string): string | null {
+  try {
+    const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    return Buffer.from(padded, "base64").toString("utf8");
+  } catch {
+    return null;
+  }
+}
+
+function isExternalHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (url.protocol === "http:" || url.protocol === "https:") && !isInternalSearchUrl(value);
+  } catch {
+    return false;
+  }
 }
 
 function stripTags(html: string): string {

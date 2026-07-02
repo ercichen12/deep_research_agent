@@ -174,6 +174,7 @@ export type SearchBatchSummary = {
   id: string;
   actionId: string;
   cycle: number;
+  queries?: string[];
   queryCount: number;
   providerCalls: Array<{
     provider: "relay" | "opencli" | "web";
@@ -351,6 +352,9 @@ export type GraphStateSummary = {
   evaluatorDecisions: EvaluatorDecision[];
   recentSearchBatches: SearchBatchSummary[];
   recentSources: SourceSummary[];
+  stale?: boolean;
+  staleReason?: string;
+  lastHeartbeatAt?: string;
   updatedAt: string;
 };
 

@@ -136,6 +136,7 @@ export function summarizeSearchBatch(input: SummarizeSearchBatchInput): SearchBa
     id: input.id,
     actionId: input.actionId,
     cycle: input.cycle,
+    queries: input.queries,
     queryCount: input.queries.length,
     providerCalls: input.providerCalls.map((call, index) => ({
       provider: normalizeSummaryProvider(call.provider),

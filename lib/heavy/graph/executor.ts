@@ -19,11 +19,21 @@ export type GraphSearchExecution = {
   sources: Array<{ summary: SourceSummary; artifact: SourceArtifact; fullText: string; snippet: string }>;
 };
 
+export type GraphSearchExecutionCallbacks = {
+  onSearchBatch?: (batch: SearchBatchSummary, artifact: SearchBatchArtifact) => Promise<void>;
+  onSourceSelected?: (urls: string[], batch: SearchBatchSummary) => Promise<void>;
+  onSourceRead?: (
+    source: { summary: SourceSummary; artifact: SourceArtifact; fullText: string; snippet: string },
+    batch: SearchBatchSummary
+  ) => Promise<void>;
+};
+
 export async function executeSearchAction(input: {
   state: ResearchState;
   action: SearchWebAction;
   provider: HeavySearchProvider;
   storage: HeavyStorageOptions;
+  callbacks?: GraphSearchExecutionCallbacks;
 }): Promise<GraphSearchExecution> {
   const providerCalls: SearchBatchArtifact["providerCalls"] = [];
   const allResults: HeavySearchResult[] = [];
@@ -62,6 +72,7 @@ export async function executeSearchAction(input: {
     expectedSignals: input.action.expectedSignals,
     candidateAliases: input.state.candidatePool.flatMap((candidate) => [candidate.name, ...candidate.aliases])
   });
+  await input.callbacks?.onSearchBatch?.(batch, artifact);
 
   const candidateAliases = input.state.candidatePool.flatMap((candidate) => [candidate.name, ...candidate.aliases]);
   const remainingTotalReads = Math.max(0, input.state.budgets.maxTotalSourcesToRead - input.state.budgets.sourcesRead);
@@ -72,6 +83,11 @@ export async function executeSearchAction(input: {
     candidateAliases,
     limit: readLimit
   });
+  const selectedUrls = selectedResults.map((result) => result.url);
+  if (selectedUrls.length) {
+    await input.callbacks?.onSourceSelected?.(selectedUrls, batch);
+  }
+
   const sources = [];
   for (const result of selectedResults) {
     const read = await input.provider.read(result).catch(() => null);
@@ -94,7 +110,7 @@ export async function executeSearchAction(input: {
       createdAt: new Date().toISOString()
     };
     await saveSourceArtifact(artifact, input.storage);
-    sources.push({
+    const sourceRecord = {
       summary: {
         sourceHash,
         title: artifact.title,
@@ -108,10 +124,12 @@ export async function executeSearchAction(input: {
       artifact,
       fullText,
       snippet: source.snippet ?? result.snippet ?? ""
-    });
+    };
+    sources.push(sourceRecord);
+    await input.callbacks?.onSourceRead?.(sourceRecord, batch);
   }
 
-  return { batch, artifact, selectedUrls: selectedResults.map((result) => result.url), sources };
+  return { batch, artifact, selectedUrls, sources };
 }
 
 function toProviderCall(log: SearchAttemptLog): SearchBatchArtifact["providerCalls"][number] {

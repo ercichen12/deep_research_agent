@@ -194,6 +194,9 @@ export type Inquiry = {
   updatedAt: string;
   turns: Turn[];
   graphState?: GraphStateSummary;
+  stale?: boolean;
+  staleReason?: string;
+  lastHeartbeatAt?: string;
 };
 
 export type LegacyHeavyEvent =

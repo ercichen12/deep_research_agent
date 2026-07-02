@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { listInquiries, type HeavyStorageOptions } from "@/lib/heavy/storage";
+import { listInquiries, loadGraphState, type HeavyStorageOptions } from "@/lib/heavy/storage";
+import { applyInquiryStaleMeta, deriveStaleGraphMeta } from "@/lib/heavy/graph/stale";
 import { normalizeBudget } from "@/lib/heavy/types";
 import { startGraphHeavyInquiry } from "@/lib/heavy/graph/graph-orchestrator";
 import { startHeavyInquiry } from "@/lib/heavy/orchestrator";
@@ -46,7 +47,15 @@ export function createInquiryPostHandler(service: InquiryStartService = defaultI
 export function createInquiryGetHandler(options: HeavyStorageOptions = {}) {
   return async function GET() {
     const inquiries = await listInquiries(options);
-    return NextResponse.json({ inquiries });
+    const hydrated = await Promise.all(
+      inquiries.map(async (inquiry) => {
+        const latestTurn = inquiry.turns.at(-1);
+        const graphState = latestTurn ? await loadGraphState(latestTurn.id, options) : null;
+        const meta = deriveStaleGraphMeta({ inquiry, turn: latestTurn, state: graphState });
+        return applyInquiryStaleMeta(inquiry, meta);
+      })
+    );
+    return NextResponse.json({ inquiries: hydrated });
   };
 }
 

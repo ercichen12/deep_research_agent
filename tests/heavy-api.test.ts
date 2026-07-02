@@ -82,6 +82,47 @@ describe("Heavy inquiry API routes", () => {
     });
   });
 
+  it("GET /api/inquiries/:id marks interrupted running graph turns as stale", async () => {
+    const { inquiry, turn } = await createInquiry("请研究一个公司", { rootDir });
+    inquiry.status = "running";
+    turn.status = "running";
+    turn.startedAt = "2000-01-01T00:00:00.000Z";
+    turn.updatedAt = "2000-01-01T00:00:00.000Z";
+    const frame = normalizeResearchFrame({
+      taskKind: "find_person_company",
+      userGoal: turn.prompt,
+      deliverable: "最大可能候选人",
+      hardConstraints: [{ id: "role", label: "CEO", core: true }]
+    });
+    const state = createResearchState({ inquiryId: inquiry.id, turnId: turn.id, frame, budget: DEFAULT_GRAPH_BUDGET });
+    state.updatedAt = "2000-01-01T00:00:00.000Z";
+    await saveInquiry(inquiry, { rootDir });
+    await saveGraphState(state, { rootDir });
+
+    const response = await createInquiryByIdGetHandler({ rootDir })(
+      new Request(`http://localhost/api/inquiries/${inquiry.id}`),
+      { params: { id: inquiry.id } }
+    );
+    const json = await response.json();
+
+    expect(json.status).toBe("running");
+    expect(json.stale).toBe(true);
+    expect(json.lastHeartbeatAt).toBe("2000-01-01T00:00:00.000Z");
+    expect(json.graphState).toMatchObject({
+      status: "running",
+      stale: true,
+      staleReason: expect.stringMatching(/interrupted|stale|超时|中断/i)
+    });
+
+    const listResponse = await createInquiryGetHandler({ rootDir })();
+    const listJson = await listResponse.json();
+    expect(listJson.inquiries[0]).toMatchObject({
+      id: inquiry.id,
+      stale: true,
+      staleReason: expect.stringMatching(/interrupted|stale|超时|中断/i)
+    });
+  });
+
   it("artifact endpoints return graph artifacts without full source text", async () => {
     const { inquiry, turn } = await createInquiry("请研究一个公司", { rootDir });
     const frame = normalizeResearchFrame({ userGoal: turn.prompt, deliverable: "report" });

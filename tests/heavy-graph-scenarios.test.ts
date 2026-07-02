@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createResearchFrame } from "@/lib/heavy/graph/frame";
 import { planGraphActions } from "@/lib/heavy/graph/planner";
 import { extractEvidence } from "@/lib/heavy/graph/evidence-extractor";
+import { evaluateGraphState } from "@/lib/heavy/graph/evaluator";
 import { finalizeGraphReport } from "@/lib/heavy/graph/finalizer";
 import { buildEvidenceMatrix, hardConstraintsEnough } from "@/lib/heavy/graph/evidence-matrix";
 import { scoreCandidate } from "@/lib/heavy/graph/candidate-pool";
@@ -42,6 +43,48 @@ describe("Graph Heavy Apodex-derived scenarios", () => {
     expect(queries).toMatch(/exam|license/i);
     expect(queries).toMatch(/AI|free|website/i);
     expect(queries).not.toMatch(/[\u3400-\u9fff\uf900-\ufaff]/);
+  });
+
+  it("CEO plus official website tasks keep the named entity instead of using the exam/license template", () => {
+    const state = stateFor("QA smoke test: find the current CEO and official website of OpenAI. Use English search keywords only.");
+    const queries = searchQueries(planGraphActions(state));
+    const queryText = queries.join(" ");
+
+    expect(state.frame.taskKind).toBe("find_person_company");
+    expect(queryText).toMatch(/OpenAI/i);
+    expect(queryText).toMatch(/CEO|official website/i);
+    expect(queryText).not.toMatch(/exam|license|practice/i);
+    expect(queries.every((query) => !/[\u3400-\u9fff\uf900-\ufaff]/.test(query))).toBe(true);
+  });
+
+  it("OpenAI CEO and official website sources produce a maximum-likelihood named candidate", () => {
+    const frame = createResearchFrame("QA smoke test: find the current CEO and official website of OpenAI. Use English search keywords only.");
+    const output = extractEvidence({
+      frame,
+      sources: [
+        {
+          summary: source("https://www.businessinsider.com/sam-altman", "Meet Sam Altman, OpenAI's Cofounder and CEO"),
+          snippet: "The career rise of OpenAI's billionaire CEO, Sam Altman.",
+          fullText: "Sam Altman is the cofounder and CEO of OpenAI. OpenAI is the company behind ChatGPT."
+        },
+        {
+          summary: source("https://openai.com/", "OpenAI"),
+          snippet: "Official OpenAI website.",
+          fullText: "OpenAI official website. OpenAI creates AI products and research for everyone."
+        },
+        {
+          summary: source("https://openai.com/index/review-completed-altman-brockman-to-continue-to-lead-openai/", "Review completed & Altman, Brockman to continue to lead OpenAI | OpenAI"),
+          snippet: "Altman and Brockman continue to lead OpenAI.",
+          fullText: "OpenAI announced that Sam Altman and Greg Brockman continue to lead OpenAI."
+        }
+      ]
+    });
+
+    expect(output.candidates.map((candidate) => candidate.name)).toContain("Sam Altman / OpenAI");
+    expect(output.evidenceItems.flatMap((item) => item.constraintIds)).toEqual(
+      expect.arrayContaining(["person_identity", "company_identity", "role", "official_website", "verification_chain"])
+    );
+    expect(output.evidenceItems.every((item) => item.sourceUrl.startsWith("https://"))).toBe(true);
   });
 
   it("Cloudflare/free subdomain verification models PSL and NS delegation as hidden success criteria", () => {
@@ -116,6 +159,144 @@ describe("Graph Heavy Apodex-derived scenarios", () => {
     expect(queries).toEqual(expect.arrayContaining(["Andromeda Robotics CEO AI interview"]));
     expect(queries.some((query) => /official|profile|interview|funding/i.test(query))).toBe(true);
     expect(queries.every((query) => !/[\u3400-\u9fff\uf900-\ufaff]/.test(query))).toBe(true);
+  });
+
+  it("rich search with zero extracted evidence triggers extraction-focused revision instead of repeating the same queries", () => {
+    const state = stateFor("QA smoke test: find the current CEO and official website of OpenAI. Use English search keywords only.");
+    const initialQueries = searchQueries(planGraphActions(state));
+    state.searchLedger.push({
+      id: "batch_rich_no_evidence",
+      actionId: "act_1",
+      cycle: 1,
+      queryCount: initialQueries.length,
+      providerCalls: [],
+      dedupedResultCount: 33,
+      uniqueDomainCount: 21,
+      expectedSignalHits: ["OpenAI company identity", "current CEO founder senior leadership"],
+      officialOrPrimaryCount: 1,
+      candidateMentions: [],
+      quality: "mixed"
+    });
+    state.sourceLedger.push({
+      sourceHash: "source_sam_altman",
+      title: "Meet Sam Altman, OpenAI's Cofounder and CEO",
+      url: "https://www.businessinsider.com/sam-altman",
+      provider: "opencli",
+      engine: "brave",
+      status: "read",
+      readCharCount: 12000,
+      evidenceIds: []
+    });
+    state.cycleIndex = 1;
+    state.budgets.cyclesUsed = 1;
+
+    const decision = evaluateGraphState(state);
+    state.evaluatorDecisions.push(decision);
+    const nextQueries = searchQueries(planGraphActions(state));
+
+    expect(decision.action).toBe("revise_query");
+    expect(decision.reason).toMatch(/抽取|候选|extraction/i);
+    expect(nextQueries).not.toEqual(initialQueries);
+    expect(nextQueries.every((query) => !/[\u3400-\u9fff\uf900-\ufaff]/.test(query))).toBe(true);
+    expect(nextQueries.some((query) => /Sam Altman|Business Insider|OpenAI CEO/i.test(query))).toBe(true);
+  });
+
+  it("revised search never replays the same queries when every base query was already used", () => {
+    const state = stateFor("QA smoke test: find the current CEO and official website of OpenAI. Use English search keywords only.");
+    state.budgets.maxQueriesPerSearchAction = 1;
+    const initialQueries = searchQueries(planGraphActions(state));
+    state.searchLedger.push({
+      id: "batch_all_used",
+      actionId: "act_1",
+      cycle: 1,
+      queries: initialQueries,
+      queryCount: initialQueries.length,
+      providerCalls: [],
+      dedupedResultCount: 1,
+      uniqueDomainCount: 1,
+      expectedSignalHits: [],
+      officialOrPrimaryCount: 0,
+      candidateMentions: [],
+      quality: "weak"
+    });
+    state.cycleIndex = 1;
+    const firstRevisionQueries = searchQueries(planGraphActions(state));
+    state.searchLedger.push({
+      id: "batch_revision_used",
+      actionId: "act_2",
+      cycle: 2,
+      queries: firstRevisionQueries,
+      queryCount: firstRevisionQueries.length,
+      providerCalls: [],
+      dedupedResultCount: 1,
+      uniqueDomainCount: 1,
+      expectedSignalHits: [],
+      officialOrPrimaryCount: 0,
+      candidateMentions: [],
+      quality: "weak"
+    });
+    state.cycleIndex = 2;
+
+    const nextQueries = searchQueries(planGraphActions(state));
+
+    expect(nextQueries.length).toBeGreaterThan(0);
+    expect(nextQueries.every((query) => ![...initialQueries, ...firstRevisionQueries].includes(query))).toBe(true);
+    expect(nextQueries.some((query) => /source verification|official source|news profile|primary evidence/i.test(query))).toBe(true);
+  });
+
+  it("third-party pages with official in the title do not create official website evidence without a matching domain", () => {
+    const frame = createResearchFrame("QA smoke test: find the current CEO and official website of OpenAI. Use English search keywords only.");
+    const output = extractEvidence({
+      frame,
+      sources: [
+        {
+          summary: source("https://profiles.example/openai-ceo", "Official profile of OpenAI CEO Sam Altman"),
+          snippet: "Sam Altman is the CEO of OpenAI.",
+          fullText: "Sam Altman is the cofounder and CEO of OpenAI. This is a third-party profile."
+        }
+      ]
+    });
+
+    expect(output.candidates.map((candidate) => candidate.name)).toContain("Sam Altman / OpenAI");
+    expect(output.evidenceItems.flatMap((item) => item.constraintIds)).not.toContain("official_website");
+  });
+
+  it("noisy OpenAI search titles do not become person candidates when Sam Altman evidence exists", () => {
+    const frame = createResearchFrame("QA smoke test: find the current CEO and official website of OpenAI. Use English search keywords only.");
+    const output = extractEvidence({
+      frame,
+      sources: [
+        {
+          summary: source("https://www.wired.com/story/sam-altman-openai-back/", "Sam Altman to Return as CEO of OpenAI | WIRED"),
+          snippet: "Sam Altman will return as CEO of OpenAI.",
+          fullText: "Sam Altman is the cofounder and CEO of OpenAI."
+        },
+        {
+          summary: source("https://example.com/openai-capabilities", "Remarkable Step Function Capabilities at OpenAI"),
+          snippet: "OpenAI leadership discussed product capabilities.",
+          fullText: "OpenAI has remarkable step function capabilities and public leadership pages, but this title is not a person."
+        },
+        {
+          summary: source("https://websets.example/openai-executives", "Meet the Visionary OpenAI, Inc. Leadership Team"),
+          snippet: "OpenAI leadership team directory.",
+          fullText: "OpenAI leadership team directory and executive overview."
+        },
+        {
+          summary: source("https://theorg.example/openai-leadership", "Partnerships Sam Altman OpenAI Leadership Team"),
+          snippet: "Partnerships Sam Altman is listed near OpenAI CEO evidence.",
+          fullText: "Partnerships Sam Altman is the CEO of OpenAI."
+        },
+        {
+          summary: source("https://forbes.example/openai", "Forbes Sam Altman Feb OpenAI CEO"),
+          snippet: "Forbes profile: Sam Altman, CEO of OpenAI.",
+          fullText: "Sam Altman is CEO of OpenAI."
+        }
+      ]
+    });
+    const names = output.candidates.map((candidate) => candidate.name);
+
+    expect(names).toContain("Sam Altman / OpenAI");
+    expect(names.some((name) => /remarkable|leadership team|wired|partnerships|forbes/i.test(name))).toBe(false);
   });
 
   it("technical verification evidence extraction creates constraint-level evidence for PSL and NS delegation", () => {

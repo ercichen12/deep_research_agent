@@ -42,8 +42,13 @@ export function planGraphActions(state: ResearchState): ResearchAction[] {
     );
   }
 
-  const clueSeeds = state.queryClues.map((clue) => clue.text);
-  const needsRevision = quality === "empty" || quality === "weak";
+  const lastDecision = state.evaluatorDecisions.at(-1);
+  const clueSeeds = [
+    ...state.queryClues.map((clue) => clue.text),
+    ...state.sourceLedger.slice(-8).flatMap((source) => [source.title, domainClue(source.url)])
+  ].filter(Boolean);
+  const needsRevision = quality === "empty" || quality === "weak" || lastDecision?.action === "revise_query";
+  const usedQueries = new Set(state.searchLedger.flatMap((batch) => batch.queries ?? []));
   const sourceTargets = revisionTargetsForTask(state.frame.taskKind);
   const angles = state.frame.initialAngles.length
     ? state.frame.initialAngles
@@ -51,9 +56,10 @@ export function planGraphActions(state: ResearchState): ResearchAction[] {
 
   return normalizeResearchActions(
     angles.slice(0, state.budgets.maxSearchActionsPerCycle).map((angle, index) => {
-      const baseQueries = needsRevision
+      const revisedQueries = needsRevision
         ? reviseQueries([...clueSeeds, ...angle.querySeeds], sourceTargets, state.budgets.maxQueriesPerSearchAction)
         : angle.querySeeds;
+      const baseQueries = filterRepeatedQueries(revisedQueries, usedQueries, state.budgets.maxQueriesPerSearchAction);
       return {
         type: "search_web",
         purpose: needsRevision ? `revised ${angle.title}` : index === 0 ? "initial broad search" : angle.title,
@@ -73,6 +79,28 @@ export function planGraphActions(state: ResearchState): ResearchAction[] {
     cycle,
     state.budgets
   );
+}
+
+function filterRepeatedQueries(queries: string[], usedQueries: Set<string>, limit: number): string[] {
+  const fresh = queries.filter((query) => !usedQueries.has(query));
+  if (fresh.length) {
+    return fresh.slice(0, limit);
+  }
+
+  return expandRepeatedQueries(queries, usedQueries).slice(0, limit);
+}
+
+function expandRepeatedQueries(queries: string[], usedQueries: Set<string>): string[] {
+  const variants: string[] = [];
+  for (const query of queries) {
+    for (const suffix of ["source verification", "official source", "news profile", "primary evidence"]) {
+      variants.push(`${query} ${suffix}`);
+    }
+    if (!query.startsWith('"') && !query.endsWith('"')) {
+      variants.push(`"${query}"`);
+    }
+  }
+  return variants.filter((query) => !usedQueries.has(query)).filter(unique);
 }
 
 function buildCandidateDeepDiveQueries(state: ResearchState, candidate: { name: string; aliases: string[] }): string[] {
@@ -129,4 +157,17 @@ function revisionTargetsForTask(taskKind: ResearchState["frame"]["taskKind"]): s
     return ["data model entity resolution workflow", "external validation boundary"];
   }
   return ["official source documentation", "directory database"];
+}
+
+function domainClue(value: string): string {
+  try {
+    const hostname = new URL(value).hostname.replace(/^www\./, "");
+    return hostname.split(".").slice(0, -1).join(" ");
+  } catch {
+    return "";
+  }
+}
+
+function unique<T>(value: T, index: number, array: T[]): boolean {
+  return array.indexOf(value) === index;
 }

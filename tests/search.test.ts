@@ -55,6 +55,26 @@ describe("parseSearchResults", () => {
     ]);
   });
 
+  it("unwraps Bing redirect URLs before filtering internal search links", () => {
+    const html = `
+      <html>
+        <body>
+          <li class="b_algo">
+            <h2>
+              <a href="https://www.bing.com/ck/a?!&amp;&amp;p=abc&amp;u=a1aHR0cHM6Ly9vcGVuYWkuY29tLw&amp;ntb=1">
+                OpenAI Official Website
+              </a>
+            </h2>
+          </li>
+        </body>
+      </html>
+    `;
+
+    const results = parseSearchResults(html);
+
+    expect(results).toEqual([{ title: "OpenAI Official Website", url: "https://openai.com/" }]);
+  });
+
   it("filters dictionary and generic government pages from search results", () => {
     const results = filterLowValueResults([
       { title: "Australia 是什么意思", url: "https://www.iciba.com/word?w=Australia" },

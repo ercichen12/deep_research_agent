@@ -2,8 +2,8 @@ import { readFile, rm, mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { runGraphHeavyInquiry } from "@/lib/heavy/graph/graph-orchestrator";
-import { loadGraphState, loadInquiry, loadSearchBatchArtifact, loadSourceArtifact } from "@/lib/heavy/storage";
+import { runGraphHeavyInquiry, startGraphHeavyInquiry } from "@/lib/heavy/graph/graph-orchestrator";
+import { loadGraphState, loadInquiry, loadSearchBatchArtifact, loadSourceArtifact, readTurnEvents } from "@/lib/heavy/storage";
 import type { HeavySearchProvider, HeavySearchResult, HeavySource } from "@/lib/heavy/types";
 
 describe("Graph Heavy orchestrator", () => {
@@ -82,6 +82,63 @@ describe("Graph Heavy orchestrator", () => {
     expect(source?.fullText).toBeUndefined();
   });
 
+  it("emits search batch events before slow source reads finish", async () => {
+    const readGate = deferred<void>();
+    let readStarted = false;
+    const provider: HeavySearchProvider = {
+      async search(query) {
+        return [
+          {
+            title: "Andromeda Robotics Team Grace Brown CEO",
+            url: "https://andromedarobotics.example/team",
+            snippet: `Grace Brown is CEO of Andromeda Robotics. Query: ${query}`,
+            provider: "opencli",
+            engine: "brave"
+          }
+        ];
+      },
+      async read(result) {
+        readStarted = true;
+        await readGate.promise;
+        return {
+          ...result,
+          snippet: result.snippet ?? "",
+          fullText: "Grace Brown is CEO of Andromeda Robotics. Andromeda Robotics builds Australian robotics AI hardware.",
+          readCharCount: 96
+        };
+      }
+    };
+
+    const { turnId } = await startGraphHeavyInquiry("找澳大利亚创新硬件 CEO", {
+      rootDir,
+      awaitCompletion: false,
+      provider,
+      budget: {
+        maxCycles: 1,
+        maxActionsPerCycle: 1,
+        maxSearchActionsPerCycle: 1,
+        maxQueriesPerSearchAction: 1,
+        maxResultsPerQuery: 30,
+        maxSourcesToReadPerCycle: 1,
+        maxTotalSourcesToRead: 1,
+        maxPromotedCandidates: 2
+      }
+    });
+
+    try {
+      await waitUntil(() => readStarted, 1000);
+      const eventsBeforeReadCompletes = await readTurnEvents(turnId, { rootDir });
+      const eventTypes = eventsBeforeReadCompletes.map((event) => event.type);
+
+      expect(eventTypes).toContain("search_batch_reported");
+      expect(eventTypes).toContain("source_selected");
+      expect(eventTypes).not.toContain("source_read");
+    } finally {
+      readGate.resolve();
+      await waitForEvent(turnId, "turn_completed", rootDir, 1500).catch(() => undefined);
+    }
+  });
+
   it("fails clearly when no evidence is found and budget is exhausted", async () => {
     const inquiry = await runGraphHeavyInquiry("Find an impossible candidate with no public evidence", {
       rootDir,
@@ -118,22 +175,22 @@ function mockProvider(): HeavySearchProvider {
           title: "Andromeda Robotics Team Grace Brown CEO",
           url: "https://andromedarobotics.example/team",
           snippet: "Grace Brown is CEO of Andromeda Robotics, an Australian robotics AI hardware company.",
-          provider: "opencli",
-          engine: "google"
+          provider: "opencli" as const,
+          engine: "google" as const
         },
         {
           title: "Grace Brown interview on AI robotics",
           url: "https://news.example/grace-brown-ai-robotics",
           snippet: "Grace Brown discussed AI in robotics and hardware deployment in Australia.",
-          provider: "opencli",
-          engine: "brave"
+          provider: "opencli" as const,
+          engine: "brave" as const
         },
         {
           title: "Andromeda Robotics funding and expansion",
           url: "https://funding.example/andromeda-robotics-growth",
           snippet: "Andromeda Robotics raised funding and expanded manufacturing, a proxy for growth.",
-          provider: "opencli",
-          engine: "duckduckgo"
+          provider: "opencli" as const,
+          engine: "duckduckgo" as const
         }
       ].slice(0, limit);
       searchLogs.push({
@@ -188,4 +245,29 @@ function emptyProvider(): HeavySearchProvider {
       return { ...result, snippet: result.snippet ?? "", fullText: "" };
     }
   };
+}
+
+function deferred<T>() {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((promiseResolve, promiseReject) => {
+    resolve = promiseResolve;
+    reject = promiseReject;
+  });
+  return { promise, resolve, reject };
+}
+
+async function waitUntil(check: () => boolean | Promise<boolean>, timeoutMs: number): Promise<void> {
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < timeoutMs) {
+    if (await check()) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+  throw new Error("Timed out waiting for condition");
+}
+
+async function waitForEvent(turnId: string, type: string, rootDir: string, timeoutMs: number): Promise<void> {
+  await waitUntil(async () => (await readTurnEvents(turnId, { rootDir })).some((event) => event.type === type), timeoutMs);
 }

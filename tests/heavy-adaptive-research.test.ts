@@ -323,9 +323,15 @@ describe("Adaptive Heavy research", () => {
       task: task("identity_research", "身份", "Identify CEO and company"),
       provider,
       budget: { ...DEFAULT_HEAVY_BUDGET, maxSourcesPerAgent: 1 },
-      onStep: (step) => emittedSteps.push(step),
-      onSearchLog: (log) => emittedSearchLogs.push(log),
-      onReadLog: (log) => emittedReadLogs.push(log)
+      onStep: (step) => {
+        emittedSteps.push(step);
+      },
+      onSearchLog: (log) => {
+        emittedSearchLogs.push(log);
+      },
+      onReadLog: (log) => {
+        emittedReadLogs.push(log);
+      }
     });
 
     expect(emittedSteps[0]).toMatchObject({ type: "intent", title: "识别任务意图" });

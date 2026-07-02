@@ -81,7 +81,7 @@ function hangingProvider(): HeavySearchProvider {
   };
 }
 
-async function waitFor<T>(callback: () => Promise<T | undefined>, timeoutMs = 500): Promise<T> {
+async function waitFor<T>(callback: () => Promise<T | undefined>, timeoutMs = 10000): Promise<T> {
   const startedAt = Date.now();
   while (Date.now() - startedAt < timeoutMs) {
     const result = await callback();

@@ -98,7 +98,7 @@ export async function runExistingGraphInquiry(inquiryId: string, turnId: string,
         state.updatedAt = new Date().toISOString();
         await persistGraphState(inquiry, state, options);
         if (action.type === "search_web") {
-          await runSearchStep(state, action, provider, options);
+          await runSearchStep(inquiry, state, action, provider, options);
         }
       }
 
@@ -146,52 +146,70 @@ export async function runExistingGraphInquiry(inquiryId: string, turnId: string,
 }
 
 async function runSearchStep(
+  inquiry: Inquiry,
   state: ResearchState,
   action: SearchWebAction,
   provider: HeavySearchProvider,
   options: HeavyStorageOptions
 ): Promise<void> {
-  const execution = await executeSearchAction({ state, action, provider, storage: options });
   state.budgets.searchActionsUsed += 1;
   state.budgets.queriesUsed += action.queries.length;
-  state.searchLedger.push(execution.batch);
-  await appendTurnEvent(
-    {
-      type: "search_batch_reported",
-      inquiryId: state.inquiryId,
-      turnId: state.turnId,
-      cycle: execution.batch.cycle,
-      actionId: action.id,
-      batch: execution.batch,
-      timestamp: new Date().toISOString()
-    },
-    options
-  );
-
-  if (execution.selectedUrls.length) {
-    await appendTurnEvent(
-      {
-        type: "source_selected",
-        inquiryId: state.inquiryId,
-        turnId: state.turnId,
-        cycle: execution.batch.cycle,
-        actionId: action.id,
-        urls: execution.selectedUrls,
-        timestamp: new Date().toISOString()
+  const execution = await executeSearchAction({
+    state,
+    action,
+    provider,
+    storage: options,
+    callbacks: {
+      async onSearchBatch(batch) {
+        state.searchLedger.push(batch);
+        state.updatedAt = new Date().toISOString();
+        await persistGraphState(inquiry, state, options);
+        await appendTurnEvent(
+          {
+            type: "search_batch_reported",
+            inquiryId: state.inquiryId,
+            turnId: state.turnId,
+            cycle: batch.cycle,
+            actionId: action.id,
+            batch,
+            timestamp: new Date().toISOString()
+          },
+          options
+        );
       },
-      options
-    );
-  }
-
-  const nextSources = execution.sources.map((source) => source.summary);
-  state.budgets.sourcesRead += nextSources.length;
-  state.sourceLedger.push(...nextSources);
-  for (const source of nextSources) {
-    await appendTurnEvent(
-      { type: "source_read", inquiryId: state.inquiryId, turnId: state.turnId, cycle: execution.batch.cycle, source, timestamp: new Date().toISOString() },
-      options
-    );
-  }
+      async onSourceSelected(urls, batch) {
+        await appendTurnEvent(
+          {
+            type: "source_selected",
+            inquiryId: state.inquiryId,
+            turnId: state.turnId,
+            cycle: batch.cycle,
+            actionId: action.id,
+            urls,
+            timestamp: new Date().toISOString()
+          },
+          options
+        );
+      },
+      async onSourceRead(sourceRecord, batch) {
+        state.budgets.sourcesRead += 1;
+        state.sourceLedger.push(sourceRecord.summary);
+        state.updatedAt = new Date().toISOString();
+        await persistGraphState(inquiry, state, options);
+        await appendTurnEvent(
+          {
+            type: "source_read",
+            inquiryId: state.inquiryId,
+            turnId: state.turnId,
+            cycle: batch.cycle,
+            source: sourceRecord.summary,
+            timestamp: new Date().toISOString()
+          },
+          options
+        );
+      }
+    }
+  });
 
   const extracted = extractEvidence({ frame: state.frame, sources: execution.sources });
   if (extracted.candidates.length) {

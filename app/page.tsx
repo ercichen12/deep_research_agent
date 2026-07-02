@@ -15,9 +15,17 @@ type HealthState =
       status: "ok";
       baseUrl: string;
       configuredModel: string;
-      searchProvider: { provider?: string; relayConfigured?: boolean; openCliFallback?: boolean; webFallback?: boolean };
+      searchProvider: {
+        provider?: string;
+        relayConfigured?: boolean;
+        relayLiveStatus?: "ok" | "error" | "not_configured" | "unchecked";
+        relayReady?: boolean;
+        relayStatusCode?: number;
+        openCliFallback?: boolean;
+        webFallback?: boolean;
+      };
     }
-  | { status: "error"; message: string; searchProvider?: { provider?: string; relayConfigured?: boolean } };
+  | { status: "error"; message: string; searchProvider?: { provider?: string; relayConfigured?: boolean; relayLiveStatus?: string; relayReady?: boolean } };
 
 type ArtifactLoadState<T> =
   | { status: "idle" }
@@ -194,8 +202,12 @@ export default function Home() {
               onClick={() => setActiveInquiryId(inquiry.id)}
               type="button"
             >
-              <span>{statusLabel(inquiry.status)}</span>
+              <span>
+                {statusLabel(inquiry.status)}
+                {inquiry.stale ? " · stale" : ""}
+              </span>
               <strong>{inquiry.prompt}</strong>
+              {inquiry.stale ? <small>{inquiry.staleReason ?? "Graph run appears stale."}</small> : null}
               <small>{new Date(inquiry.updatedAt).toLocaleString()}</small>
             </button>
           ))}
@@ -397,8 +409,10 @@ function GraphStatePanel({ graphState, inquiryId }: { graphState: GraphStateSumm
         <h2>Graph Research</h2>
         <span>
           Cycle {graphState.cycleIndex} · {graphState.status}
+          {graphState.stale ? " · stale" : ""}
         </span>
       </div>
+      {graphState.stale ? <p className="error">{graphState.staleReason ?? "Graph run appears stale."}</p> : null}
 
       <div className="graph-metrics">
         <Metric label="任务类型" value={graphState.frame.taskKind} />
@@ -605,9 +619,22 @@ function ProviderStatus({ health }: { health: HealthState }) {
   return (
     <p className="provider-status">
       {health.configuredModel} · {health.searchProvider.provider ?? "relay"}
-      {health.searchProvider.relayConfigured ? " · relay ready" : " · relay 未配置"}
+      {formatRelayHealth(health.searchProvider)}
     </p>
   );
+}
+
+function formatRelayHealth(searchProvider: Extract<HealthState, { status: "ok" }>["searchProvider"]): string {
+  if (!searchProvider.relayConfigured) {
+    return " · relay 未配置";
+  }
+  if (searchProvider.relayReady || searchProvider.relayLiveStatus === "ok") {
+    return " · relay live ok";
+  }
+  if (searchProvider.relayLiveStatus === "error") {
+    return searchProvider.relayStatusCode ? ` · relay live error ${searchProvider.relayStatusCode}` : " · relay live error";
+  }
+  return " · relay configured";
 }
 
 function Metric({ label, value }: { label: string; value: string }) {

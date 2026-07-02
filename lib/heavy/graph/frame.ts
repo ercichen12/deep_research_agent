@@ -3,21 +3,31 @@ import { DEFAULT_GRAPH_BUDGET, normalizeResearchFrame, type GraphBudgetState, ty
 export function createResearchFrame(prompt: string, budget: GraphBudgetState = DEFAULT_GRAPH_BUDGET): ResearchFrame {
   const taskKind = inferTaskKind(prompt);
   const lower = prompt.toLowerCase();
+  const namedSubject = extractNamedSubject(prompt);
 
   if (taskKind === "find_person_company") {
+    const isNamedEntityLookup = Boolean(namedSubject);
     return normalizeResearchFrame(
       {
         taskKind,
         userGoal: prompt,
         deliverable: "最大可能候选人 / company match with evidence matrix",
-        hardConstraints: [
-          { id: "person_identity", label: "person identity", core: true },
-          { id: "company_identity", label: "company identity", core: true },
-          { id: "role", label: "CEO founder senior leadership", core: true },
-          { id: "industry_fit", label: "innovative robotics AI hardware company", core: true },
-          { id: "geography", label: lower.includes("australia") || prompt.includes("澳大利亚") ? "Australia" : "target geography", core: true },
-          { id: "ai_public_view", label: "recent public AI viewpoint" }
-        ],
+        hardConstraints: isNamedEntityLookup
+          ? [
+              { id: "person_identity", label: `${namedSubject} current CEO identity`, core: true },
+              { id: "company_identity", label: `${namedSubject} company identity`, core: true },
+              { id: "role", label: "current CEO founder senior leadership", core: true },
+              { id: "official_website", label: `${namedSubject} official website`, core: true },
+              { id: "verification_chain", label: "source chain verifying role and official website", core: true }
+            ]
+          : [
+              { id: "person_identity", label: "person identity", core: true },
+              { id: "company_identity", label: "company identity", core: true },
+              { id: "role", label: "CEO founder senior leadership", core: true },
+              { id: "industry_fit", label: "innovative robotics AI hardware company", core: true },
+              { id: "geography", label: lower.includes("australia") || prompt.includes("澳大利亚") ? "Australia" : "target geography", core: true },
+              { id: "ai_public_view", label: "recent public AI viewpoint" }
+            ],
         softPreferences: lower.includes("growth") || prompt.includes("增长")
           ? [{ id: "growth", label: "30% annual growth or credible proxy growth evidence" }]
           : [],
@@ -26,23 +36,42 @@ export function createResearchFrame(prompt: string, budget: GraphBudgetState = D
           ...(prompt.includes("医疗") || lower.includes("medical") ? [{ id: "no_medical", label: "not medical devices" }] : []),
           ...(prompt.includes("重工") || lower.includes("heavy") ? [{ id: "no_heavy", label: "not heavy manufacturing" }] : [])
         ],
-        initialAngles: [
-          {
-            id: "broad_candidate_search",
-            title: "Broad candidate search",
-            priority: "high",
-            querySeeds: [
-              "Australian robotics AI hardware CEO founder interview",
-              "Australia innovative hardware robotics CEO AI article"
+        initialAngles: isNamedEntityLookup
+          ? [
+              {
+                id: "named_entity_leadership_search",
+                title: "Named entity leadership search",
+                priority: "high",
+                querySeeds: [
+                  `${namedSubject} current CEO official website`,
+                  `${namedSubject} leadership CEO official site`,
+                  `${namedSubject} company profile CEO official website`
+                ]
+              },
+              {
+                id: "named_entity_verification_search",
+                title: "Named entity verification search",
+                priority: "medium",
+                querySeeds: [`${namedSubject} CEO source official newsroom profile`]
+              }
             ]
-          },
-          {
-            id: "growth_signal_search",
-            title: "Growth signal search",
-            priority: "medium",
-            querySeeds: ["Australian robotics hardware startup funding expansion CEO"]
-          }
-        ],
+          : [
+              {
+                id: "broad_candidate_search",
+                title: "Broad candidate search",
+                priority: "high",
+                querySeeds: [
+                  "Australian robotics AI hardware CEO founder interview",
+                  "Australia innovative hardware robotics CEO AI article"
+                ]
+              },
+              {
+                id: "growth_signal_search",
+                title: "Growth signal search",
+                priority: "medium",
+                querySeeds: ["Australian robotics hardware startup funding expansion CEO"]
+              }
+            ],
         stopCriteria: ["rank best candidate when core constraints have direct or proxy evidence"]
       },
       budget
@@ -288,11 +317,14 @@ function inferTaskKind(prompt: string): TaskKind {
   if (/eol|sales|销售|库存/.test(lower)) {
     return "sales_strategy";
   }
-  if (/website|网站|考试|license|许可/.test(lower)) {
+  if (/考试|license|许可|exam/.test(lower)) {
     return "find_website";
   }
   if (/ceo|founder|公司|company|person|人/.test(lower)) {
     return "find_person_company";
+  }
+  if (/website|网站/.test(lower)) {
+    return "find_website";
   }
   return "general_research";
 }
@@ -301,3 +333,42 @@ function promptToEnglishFallback(prompt: string): string {
   const stripped = prompt.replace(/[\u3400-\u9fff\uf900-\ufaff]+/g, " ").replace(/\s+/g, " ").trim();
   return stripped || "public evidence research";
 }
+
+function extractNamedSubject(prompt: string): string | null {
+  const ofMatch = prompt.match(/\b(?:of|for|about)\s+([A-Z][A-Za-z0-9&.-]*(?:\s+[A-Z][A-Za-z0-9&.-]*){0,3})/);
+  if (ofMatch?.[1]) {
+    return cleanNamedSubject(ofMatch[1]);
+  }
+
+  const candidates = prompt.match(/\b[A-Z][A-Za-z0-9&.-]*(?:\s+[A-Z][A-Za-z0-9&.-]*){0,2}\b/g) ?? [];
+  for (const candidate of candidates) {
+    const cleaned = cleanNamedSubject(candidate);
+    if (cleaned) {
+      return cleaned;
+    }
+  }
+  return null;
+}
+
+function cleanNamedSubject(value: string): string | null {
+  const cleaned = value.replace(/[^\w&.\-\s]/g, " ").replace(/\s+/g, " ").trim();
+  if (!cleaned || NAMED_SUBJECT_STOPWORDS.has(cleaned.toLowerCase())) {
+    return null;
+  }
+  const words = cleaned.split(/\s+/).filter((word) => !NAMED_SUBJECT_STOPWORDS.has(word.toLowerCase()));
+  const subject = words.join(" ").trim();
+  return subject || null;
+}
+
+const NAMED_SUBJECT_STOPWORDS = new Set([
+  "ai",
+  "ceo",
+  "english",
+  "find",
+  "official",
+  "qa",
+  "smoke",
+  "test",
+  "use",
+  "website"
+]);

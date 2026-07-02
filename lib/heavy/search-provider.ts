@@ -1,4 +1,4 @@
-import { readWithOpenCli, searchWithOpenCli } from "@/lib/opencli";
+import { isOpenCliBridgeError, readWithOpenCli, searchWithOpenCli } from "@/lib/opencli";
 import { searchWeb } from "@/lib/search";
 import { fetchSource } from "@/lib/source";
 import type { ResearchSource, SearchResult } from "@/lib/types";
@@ -24,6 +24,7 @@ type SearchProviderDeps = {
   timeoutMs?: number;
   trace?: SearchAttemptLog[];
   readTrace?: ReadAttemptLog[];
+  openCliBridgeState?: { unavailable: boolean };
 };
 
 const DEFAULT_RELAY_TIMEOUT_MS = 20_000;
@@ -37,10 +38,12 @@ export function createHeavySearchProvider(deps: SearchProviderDeps = {}): HeavyS
   const env = deps.env ?? process.env;
   const trace = deps.trace ?? [];
   const readTrace = deps.readTrace ?? [];
+  const openCliBridgeState = deps.openCliBridgeState ?? { unavailable: false };
   const scopedDeps: SearchProviderDeps = {
     ...deps,
     trace,
-    readTrace
+    readTrace,
+    openCliBridgeState
   };
 
   return {
@@ -130,6 +133,15 @@ export async function searchRelay(query: string, limit: number, deps: SearchProv
   const url = env.SEARCH_RELAY_URL;
 
   if (!apiKey || !url) {
+    pushSearchTrace(deps, {
+      provider: "relay",
+      engine: "relay",
+      query,
+      status: "error",
+      results: [],
+      message: "not_configured",
+      durationMs: 0
+    });
     return [];
   }
 
@@ -194,6 +206,18 @@ export function parseRelaySearchResults(json: unknown): HeavySearchResult[] {
 }
 
 async function searchOpenCli(query: string, limit: number, deps: SearchProviderDeps): Promise<HeavySearchResult[]> {
+  if (deps.openCliBridgeState?.unavailable) {
+    pushSearchTrace(deps, {
+      provider: "opencli",
+      query,
+      status: "error",
+      results: [],
+      message: "OpenCLI Browser Bridge extension is not connected; skipped OpenCLI search for this query.",
+      durationMs: 0
+    });
+    return [];
+  }
+
   if (deps.openCliSearch) {
     const startedAt = Date.now();
     const results = (await deps.openCliSearch(query, limit))
@@ -232,15 +256,22 @@ async function searchOpenCli(query: string, limit: number, deps: SearchProviderD
         durationMs: Date.now() - startedAt
       });
     } catch (error) {
+      const message = compactError(error instanceof Error ? error.message : `${engine} search failed`);
       pushSearchTrace(deps, {
         provider: "opencli",
         engine,
         query,
         status: "error",
         results: [],
-        message: compactError(error instanceof Error ? error.message : `${engine} search failed`),
+        message,
         durationMs: Date.now() - startedAt
       });
+      if (isOpenCliBridgeError(message)) {
+        if (deps.openCliBridgeState) {
+          deps.openCliBridgeState.unavailable = true;
+        }
+        break;
+      }
     }
   }
 

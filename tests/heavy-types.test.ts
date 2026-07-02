@@ -15,7 +15,7 @@ describe("Heavy type normalization", () => {
   });
 
   it("allows wide maxSourcesPerAgent values from environment", () => {
-    expect(normalizeBudget({}, { HEAVY_MAX_SOURCES_PER_AGENT: "60" }).maxSourcesPerAgent).toBe(60);
+    expect(normalizeBudget({}, { NODE_ENV: "test", HEAVY_MAX_SOURCES_PER_AGENT: "60" } as NodeJS.ProcessEnv).maxSourcesPerAgent).toBe(60);
   });
 
   it("extracts fenced JSON objects", () => {

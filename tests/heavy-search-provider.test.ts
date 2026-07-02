@@ -1,10 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { createHeavySearchProvider, parseRelaySearchResults } from "@/lib/heavy/search-provider";
-import type { HeavySearchResult, HeavySource } from "@/lib/heavy/types";
+import type { HeavySearchResult, HeavySource, ReadAttemptLog, SearchAttemptLog } from "@/lib/heavy/types";
 
 describe("relay/OpenCLI heavy search provider", () => {
   it("parses relay output_text strict JSON results", async () => {
-    const relayFetch = vi.fn(async () => jsonResponse({ output_text: '{"results":[{"title":"A","url":"https://example.com/a","snippet":"alpha"}]}' }));
+    const relayFetch = vi.fn(async (_url: string | URL | Request, _init?: RequestInit) =>
+      jsonResponse({ output_text: '{"results":[{"title":"A","url":"https://example.com/a","snippet":"alpha"}]}' })
+    );
     const provider = createHeavySearchProvider({
       env: relayEnv(),
       relayFetch,
@@ -69,7 +71,7 @@ describe("relay/OpenCLI heavy search provider", () => {
   });
 
   it("traces relay, each OpenCLI engine, and web fallback calls", async () => {
-    const trace = [];
+    const trace: SearchAttemptLog[] = [];
     const provider = createHeavySearchProvider({
       env: relayEnv(),
       trace,
@@ -94,9 +96,30 @@ describe("relay/OpenCLI heavy search provider", () => {
     expect(trace.find((entry) => entry.engine === "brave")?.results[0].title).toBe("Brave result");
   });
 
+  it("traces relay as not_configured before falling back", async () => {
+    const trace: SearchAttemptLog[] = [];
+    const provider = createHeavySearchProvider({
+      env: { NODE_ENV: "test", SEARCH_PROVIDER: "relay" } as NodeJS.ProcessEnv,
+      trace,
+      openCliSearch: async () => [],
+      webSearch: async () => []
+    });
+
+    await expect(provider.search("OpenAI current CEO official website", 3)).resolves.toEqual([]);
+
+    expect(trace[0]).toMatchObject({
+      provider: "relay",
+      engine: "relay",
+      status: "error",
+      query: "OpenAI current CEO official website",
+      results: [],
+      message: "not_configured"
+    });
+  });
+
   it("aggregates relay and all OpenCLI engines instead of stopping after relay returns one result", async () => {
     const engineLimits: Record<string, number> = {};
-    const trace = [];
+    const trace: SearchAttemptLog[] = [];
     const provider = createHeavySearchProvider({
       env: relayEnv(),
       trace,
@@ -125,20 +148,50 @@ describe("relay/OpenCLI heavy search provider", () => {
     ]);
   });
 
+  it("stops repeating OpenCLI engine calls after the browser bridge is unavailable", async () => {
+    const trace: SearchAttemptLog[] = [];
+    const calledEngines: string[] = [];
+    const provider = createHeavySearchProvider({
+      env: relayEnv(),
+      trace,
+      relayFetch: async () => jsonResponse({ output_text: '{"results":[]}' }),
+      openCliSearchByEngine: async (engine) => {
+        calledEngines.push(engine);
+        throw new Error("BROWSER_CONNECT: Browser Bridge extension not connected");
+      },
+      webSearch: async () => [{ title: "Web fallback", url: "https://web.example/a" }]
+    });
+
+    await expect(provider.search("OpenAI current CEO official website", 10)).resolves.toEqual([
+      { title: "Web fallback", url: "https://web.example/a", provider: "web" }
+    ]);
+    await provider.search("OpenAI leadership CEO official site", 10);
+
+    expect(calledEngines).toEqual(["google"]);
+    expect(trace.map((entry) => `${entry.provider}:${entry.engine ?? ""}:${entry.status}`)).toEqual([
+      "relay::empty",
+      "opencli:google:error",
+      "web:bing:done",
+      "relay::empty",
+      "opencli::error",
+      "web:bing:done"
+    ]);
+    expect(trace.find((entry) => entry.provider === "opencli" && !entry.engine)?.message).toMatch(/bridge/i);
+  });
+
   it("reads with OpenCLI first and fetch fallback second", async () => {
-    const readTrace = [];
+    const readTrace: ReadAttemptLog[] = [];
     const provider = createHeavySearchProvider({
       env: relayEnv(),
       readTrace,
       relayFetch: async () => jsonResponse({ output_text: '{"results":[]}' }),
-      openCliRead: async (): Promise<HeavySource> => {
+      openCliRead: async () => {
         throw new Error("OpenCLI read failed");
       },
-      fetchRead: async (result: HeavySearchResult): Promise<HeavySource> => ({
+      fetchRead: async (result) => ({
         ...result,
         snippet: "Fetched text",
-        fullText: "Fetched text",
-        provider: "fetch"
+        fullText: "Fetched text"
       })
     });
 
@@ -169,11 +222,12 @@ describe("relay/OpenCLI heavy search provider", () => {
 
 function relayEnv(): NodeJS.ProcessEnv {
   return {
+    NODE_ENV: "test",
     OPENAI_API_KEY: "sk-test",
     OPENAI_MODEL: "test-model",
     SEARCH_PROVIDER: "relay",
     SEARCH_RELAY_URL: "https://relay.example/v1/responses"
-  };
+  } as NodeJS.ProcessEnv;
 }
 
 function jsonResponse(body: unknown): Response {

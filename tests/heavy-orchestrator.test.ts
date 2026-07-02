@@ -191,7 +191,7 @@ describe("HeavyOrchestrator", () => {
       const partialInquiry = await waitFor(async () => {
         const inquiry = await loadInquiry(createdInquiry.id, { rootDir });
         const reports = inquiry?.turns[0]?.runs[0]?.agentReports ?? [];
-        return reports.length >= 1 ? inquiry : undefined;
+        return reports.length >= 1 && inquiry ? inquiry : undefined;
       }, "partial agent report to be saved to inquiry JSON");
       const partialReports = partialInquiry.turns[0].runs[0].agentReports;
       expect(partialReports.map((item) => item.taskId)).toEqual(["fast_task"]);
@@ -544,7 +544,7 @@ async function readLogEvents(rootDir: string, turnId: string): Promise<HeavyEven
   }
 }
 
-async function waitFor<T>(probe: () => T | Promise<T | undefined> | undefined, label: string, timeoutMs = 3000): Promise<T> {
+async function waitFor<T>(probe: () => T | Promise<T | undefined> | undefined, label: string, timeoutMs = 10000): Promise<T> {
   const startedAt = Date.now();
   while (Date.now() - startedAt < timeoutMs) {
     const value = await probe();

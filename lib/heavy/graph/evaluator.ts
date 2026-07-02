@@ -5,6 +5,7 @@ export function evaluateGraphState(state: ResearchState): EvaluatorDecision {
   const cycle = state.cycleIndex;
   const promoted = state.candidatePool.filter((candidate) => candidate.status === "promoted" || candidate.status === "ranked");
   const hasEvidence = state.evidenceItems.length > 0;
+  const lastSearch = state.searchLedger.at(-1);
   const budgetExhausted =
     state.budgets.cyclesUsed >= state.budgets.maxCycles ||
     state.budgets.sourcesRead >= state.budgets.maxTotalSourcesToRead ||
@@ -26,11 +27,38 @@ export function evaluateGraphState(state: ResearchState): EvaluatorDecision {
   if (!hasEvidence && budgetExhausted) {
     return decision(cycle, "fail", "预算耗尽且证据不足。", [], ["没有找到可用公开证据"]);
   }
-  const lastSearch = state.searchLedger.at(-1);
+  if (isRichSearchWithoutExtraction(state, lastSearch)) {
+    return decision(
+      cycle,
+      "revise_query",
+      "搜索结果已经足够丰富，但没有抽取出候选或证据，需要围绕已读网页标题重新组合英文关键词并重跑抽取。",
+      sourceCluesFromState(state),
+      unresolvedFromState(state)
+    );
+  }
   if (lastSearch?.quality === "empty" || lastSearch?.quality === "weak") {
     return decision(cycle, "revise_query", "搜索结果偏弱，需要调整英文关键词或换角度。", ["revised English queries"], unresolvedFromState(state));
   }
   return decision(cycle, "continue", "继续研究以补足候选和证据矩阵。", ["next search cycle"], unresolvedFromState(state));
+}
+
+function isRichSearchWithoutExtraction(state: ResearchState, lastSearch: ResearchState["searchLedger"][number] | undefined): boolean {
+  return Boolean(
+    lastSearch &&
+      state.evidenceItems.length === 0 &&
+      state.candidatePool.length === 0 &&
+      state.sourceLedger.length > 0 &&
+      lastSearch.quality !== "empty" &&
+      lastSearch.quality !== "weak" &&
+      (lastSearch.dedupedResultCount >= 8 || state.sourceLedger.length >= 3)
+  );
+}
+
+function sourceCluesFromState(state: ResearchState): string[] {
+  return state.sourceLedger
+    .slice(-5)
+    .map((source) => source.title)
+    .filter(Boolean);
 }
 
 function decision(

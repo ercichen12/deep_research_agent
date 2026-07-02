@@ -374,6 +374,8 @@ describe("Heavy verifier", () => {
       status: "completed" as const,
       summary: "有结论但证据不完整",
       queries: ["q"],
+      searchLogs: [],
+      readLogs: [],
       researchSteps: [],
       sources: [{ title: "A", url: "https://example.com/a", snippet: "source", provider: "test" as const }],
       findings: [
