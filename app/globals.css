@@ -296,6 +296,7 @@ button {
 }
 
 .graph-grid {
+  align-items: start;
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -305,6 +306,7 @@ button {
   background: var(--panel-soft);
   border: 1px solid var(--border);
   border-radius: 8px;
+  align-content: start;
   display: grid;
   gap: 8px;
   min-width: 0;
