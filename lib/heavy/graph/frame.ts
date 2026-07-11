@@ -270,9 +270,9 @@ export function createResearchFrame(prompt: string, budget: GraphBudgetState = D
             title: "HS8542 data workflow",
             priority: "high",
             querySeeds: [
-              "HS8542 customs data cleaning entity resolution customer segmentation",
-              "HS8542 import data peer detection customer tiering workflow",
-              "customs data entity matching importer exporter storage schema"
+              "\"HS8542\" customs import data importer consignee entity resolution",
+              "\"HS 8542\" trade data importer exporter bill of lading semiconductor",
+              "customs data importer exporter entity matching trade database schema"
             ]
           },
           {
@@ -280,8 +280,8 @@ export function createResearchFrame(prompt: string, budget: GraphBudgetState = D
             title: "EOL HTF external verification boundary",
             priority: "high",
             querySeeds: [
-              "HS code cannot determine EOL HTF electronic components external verification",
-              "electronic components EOL HTF verification beyond customs HS code"
+              "electronic components EOL lifecycle status manufacturer part number verification",
+              "obsolete hard to find semiconductor external inventory verification HS code cannot prove"
             ]
           }
         ],

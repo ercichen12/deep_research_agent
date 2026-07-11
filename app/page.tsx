@@ -347,10 +347,40 @@ function EventCard({ event }: { event: HeavyEvent }) {
           </small>
         </>
       ) : null}
+      {event.type === "evidence_extracted" ? (
+        <>
+          <span>{event.evidence.length} evidence items</span>
+          {event.evidence.slice(0, 4).map((item) => (
+            <small key={item.id}>
+              {item.strength} · {item.claim}
+            </small>
+          ))}
+        </>
+      ) : null}
+      {event.type === "candidate_extracted" ? (
+        <>
+          <span>{event.candidates.length} candidates</span>
+          {event.candidates.slice(0, 4).map((candidate) => (
+            <small key={candidate.id}>
+              {candidate.kind} · {candidate.name}
+            </small>
+          ))}
+        </>
+      ) : null}
       {event.type === "state_evaluated" ? (
         <>
           <span>{event.decision.action}</span>
           <small>{event.decision.reason}</small>
+        </>
+      ) : null}
+      {event.type === "ranking_completed" ? (
+        <>
+          <span>{event.candidates.length} ranked candidates</span>
+          {event.candidates.slice(0, 4).map((candidate) => (
+            <small key={candidate.id}>
+              {candidate.name} · {candidate.status} · {candidate.score}/100
+            </small>
+          ))}
         </>
       ) : null}
       {event.type === "workflow_artifact_reported" ? (
@@ -430,7 +460,7 @@ function GraphStatePanel({ graphState, inquiryId }: { graphState: GraphStateSumm
       {graphState.stale ? <p className="error">{graphState.staleReason ?? "Graph run appears stale."}</p> : null}
 
       <div className="graph-metrics">
-        <Metric label="任务类型" value={graphState.frame.taskKind} />
+        <Metric label="Frame" value={graphState.frame.hardConstraints.length ? "ready" : "minimal"} />
         <Metric label="Actions" value={String(graphState.actionCount)} />
         <Metric label="Search Batches" value={String(graphState.searchBatchCount)} />
         <Metric label="Sources" value={String(graphState.sourceCount)} />
@@ -439,6 +469,32 @@ function GraphStatePanel({ graphState, inquiryId }: { graphState: GraphStateSumm
       </div>
 
       <div className="graph-grid">
+        <section className="graph-card">
+          <h3>Research Frame</h3>
+          <article>
+            <strong>{graphState.frame.taskKind}</strong>
+            <p>{graphState.frame.deliverable}</p>
+            <h4>Hard Constraints</h4>
+            <ul>
+              {graphState.frame.hardConstraints.map((constraint) => (
+                <li key={constraint.id}>{constraint.label}</li>
+              ))}
+            </ul>
+            <h4>Soft Preferences</h4>
+            <ul>
+              {graphState.frame.softPreferences.map((constraint) => (
+                <li key={constraint.id}>{constraint.label}</li>
+              ))}
+            </ul>
+            <h4>Exclusions</h4>
+            <ul>
+              {graphState.frame.exclusionRules.map((constraint) => (
+                <li key={constraint.id}>{constraint.label}</li>
+              ))}
+            </ul>
+          </article>
+        </section>
+
         <section className="graph-card">
           <h3>Workflow Artifacts</h3>
           {workflowArtifacts.map((artifact) => (

@@ -414,6 +414,15 @@ describe("Graph Heavy Apodex-derived scenarios", () => {
       evidence("ev_boundary", "workflow_hs8542", "external_verification_boundary", "direct")
     );
     state.evidenceMatrix = buildEvidenceMatrix(state.frame, [], state.evidenceItems);
+    state.workflowArtifacts.push(
+      workflowArtifact("draft"),
+      workflowArtifact("critique"),
+      workflowArtifact("revision", [
+        "Gate 1: clean and normalize HS8542 customs records.",
+        "Gate 2: merge importer/exporter entities.",
+        "Gate 3: verify EOL/HTF externally."
+      ])
+    );
     state.evaluatorDecisions.push({
       id: "eval_1_finalize",
       cycle: 1,
@@ -428,7 +437,46 @@ describe("Graph Heavy Apodex-derived scenarios", () => {
 
     expect(report.markdown).toMatch(/最大可能|workflow|路径|HS8542/i);
     expect(report.markdown).toMatch(/清洗|entity|外部验证|EOL|HTF/i);
+    expect(report.markdown).toMatch(/raw_shipments|normalized_shipments|entity_aliases|customer_scores|external_verifications/i);
+    expect(report.markdown).toMatch(/客户分级规则|近 12 个月|EOL \/ HTF 边界/i);
+    expect(report.unknowns).not.toContain("workflow 还没有完成校验挑错");
+    expect(report.unknowns).not.toContain("workflow 还没有重建为有序 gates");
     expect(report.summary).not.toBe("证据不足");
+  });
+
+  it("workflow tasks switch from more searching to internal draft/critique/revision actions once evidence exists", () => {
+    const state = stateFor("用 HS8542 海关数据做客户分群，要包括清洗、实体合并、同行识别、客户分级、存储架构，以及 EOL/HTF 的外部验证边界。");
+    state.evidenceItems.push(evidence("ev_cleaning", "workflow_hs8542", "data_cleaning", "direct"));
+    state.sourceLedger.push({
+      sourceHash: "source_trade",
+      title: "Customs workflow source",
+      url: "https://trade.example/workflow",
+      provider: "opencli",
+      engine: "google",
+      status: "read",
+      readCharCount: 1000,
+      evidenceIds: ["ev_cleaning"]
+    });
+
+    const draftActions = planGraphActions(state);
+    state.workflowArtifacts.push({
+      id: "workflow_draft",
+      cycle: 1,
+      stage: "draft",
+      title: "Draft workflow",
+      summary: "Draft",
+      findings: [],
+      invalidAssumptions: [],
+      orderedGates: [],
+      sourceUrls: [],
+      createdAt: "2026-07-02T00:00:00.000Z"
+    });
+    const critiqueActions = planGraphActions(state);
+
+    expect(draftActions.every((action) => action.type !== "search_web")).toBe(true);
+    expect(draftActions[0]?.purpose).toMatch(/draft workflow/i);
+    expect(critiqueActions.every((action) => action.type !== "search_web")).toBe(true);
+    expect(critiqueActions[0]?.purpose).toMatch(/critique workflow/i);
   });
 });
 
@@ -454,6 +502,21 @@ function stateFor(prompt: string): ResearchState {
 
 function searchQueries(actions: ReturnType<typeof planGraphActions>): string[] {
   return actions.flatMap((action) => (action.type === "search_web" ? action.queries : []));
+}
+
+function workflowArtifact(stage: "draft" | "critique" | "revision", orderedGates: string[] = []) {
+  return {
+    id: `workflow_${stage}`,
+    cycle: stage === "draft" ? 1 : stage === "critique" ? 2 : 3,
+    stage,
+    title: `${stage} workflow`,
+    summary: `${stage} summary`,
+    findings: [],
+    invalidAssumptions: stage === "draft" ? [] : ["HS code cannot prove EOL/HTF by itself."],
+    orderedGates,
+    sourceUrls: [],
+    createdAt: "2026-07-02T00:00:00.000Z"
+  };
 }
 
 function source(url: string, title: string) {

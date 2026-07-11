@@ -63,12 +63,15 @@ describe("Graph Heavy orchestrator", () => {
         "search_batch_reported",
         "source_selected",
         "source_read",
+        "evidence_extracted",
         "candidate_promoted",
         "state_evaluated",
+        "ranking_completed",
         "graph_final_reported",
         "turn_completed"
       ])
     );
+    expect(state?.sourceLedger.some((source) => source.evidenceIds.length > 0)).toBe(true);
 
     const batchId = events.find((event) => event.type === "search_batch_reported")?.batch?.id;
     expect(batchId).toBeTruthy();

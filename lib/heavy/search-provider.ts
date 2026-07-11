@@ -48,31 +48,44 @@ export function createHeavySearchProvider(deps: SearchProviderDeps = {}): HeavyS
 
   return {
     async search(query, limit = 8) {
-      const collected: HeavySearchResult[] = [];
-      if ((env.SEARCH_PROVIDER ?? "relay") === "relay") {
-        const relayResults = await searchRelay(query, limit, scopedDeps).catch((error) => {
-          pushSearchTrace(scopedDeps, {
-            provider: "relay",
+      const relayTrace: SearchAttemptLog[] = [];
+      const openCliTrace: SearchAttemptLog[] = [];
+      const webTrace: SearchAttemptLog[] = [];
+      const relayPromise =
+        (env.SEARCH_PROVIDER ?? "relay") === "relay"
+          ? searchRelay(query, limit, { ...scopedDeps, trace: relayTrace }).catch((error) => {
+              pushSearchTrace(
+                { ...scopedDeps, trace: relayTrace },
+                {
+                  provider: "relay",
+                  query,
+                  status: "error",
+                  results: [],
+                  message: compactError(error instanceof Error ? error.message : "Relay search failed")
+                }
+              );
+              return [];
+            })
+          : Promise.resolve([]);
+      const openCliPromise = searchOpenCli(query, limit, { ...scopedDeps, trace: openCliTrace }).catch(() => []);
+      const webPromise = searchWebFallback(query, limit, { ...scopedDeps, trace: webTrace }).catch((error) => {
+        pushSearchTrace(
+          { ...scopedDeps, trace: webTrace },
+          {
+            provider: "web",
+            engine: "bing",
             query,
             status: "error",
             results: [],
-            message: compactError(error instanceof Error ? error.message : "Relay search failed")
-          });
-          return [];
-        });
-        collected.push(...relayResults);
-      }
+            message: compactError(error instanceof Error ? error.message : "Web fallback failed")
+          }
+        );
+        return [];
+      });
 
-      const openCliResults = await searchOpenCli(query, limit, scopedDeps).catch(() => []);
-      collected.push(...openCliResults);
-
-      const merged = dedupeSearchResults(collected).slice(0, limit);
-      if (merged.length >= limit) {
-        return merged;
-      }
-
-      const fallbackResults = await searchWebFallback(query, Math.max(limit - merged.length, 1), scopedDeps).catch(() => []);
-      return dedupeSearchResults([...merged, ...fallbackResults]).slice(0, limit);
+      const [relayResults, openCliResults, webResults] = await Promise.all([relayPromise, openCliPromise, webPromise]);
+      trace.push(...relayTrace, ...openCliTrace, ...webTrace);
+      return dedupeSearchResults([...relayResults, ...openCliResults, ...webResults]).slice(0, limit);
     },
     async read(result) {
       const openCliRead = scopedDeps.openCliRead ?? readWithOpenCli;
@@ -121,7 +134,8 @@ export function createHeavySearchProvider(deps: SearchProviderDeps = {}): HeavyS
       return createHeavySearchProvider({
         ...deps,
         trace: [],
-        readTrace: []
+        readTrace: [],
+        openCliBridgeState
       });
     }
   };
@@ -234,45 +248,55 @@ async function searchOpenCli(query: string, limit: number, deps: SearchProviderD
   }
 
   const engines = ["google", "brave", "duckduckgo"] as const;
-  const rows: SearchResult[] = [];
-  for (const engine of engines) {
-    const startedAt = Date.now();
-    try {
-      const engineSearch = deps.openCliSearchByEngine ?? searchWithOpenCli;
-      const engineResults = (await engineSearch(engine, query, openCliEngineLimit(engine, limit))).map((result) => ({
-        ...result,
-        engine
-      }));
-      rows.push(...engineResults);
-      const normalized = engineResults
-        .map((result) => normalizeHeavySearchResult(result, "opencli"))
-        .filter((result): result is HeavySearchResult => Boolean(result));
-      pushSearchTrace(deps, {
-        provider: "opencli",
-        engine,
-        query,
-        status: normalized.length > 0 ? "done" : "empty",
-        results: normalized,
-        durationMs: Date.now() - startedAt
-      });
-    } catch (error) {
-      const message = compactError(error instanceof Error ? error.message : `${engine} search failed`);
-      pushSearchTrace(deps, {
-        provider: "opencli",
-        engine,
-        query,
-        status: "error",
-        results: [],
-        message,
-        durationMs: Date.now() - startedAt
-      });
-      if (isOpenCliBridgeError(message)) {
-        if (deps.openCliBridgeState) {
-          deps.openCliBridgeState.unavailable = true;
-        }
-        break;
+  const engineRuns = await Promise.all(
+    engines.map(async (engine) => {
+      const engineTrace: SearchAttemptLog[] = [];
+      const engineDeps = { ...deps, trace: engineTrace };
+      const rows: SearchResult[] = [];
+      let bridgeUnavailable = false;
+      const startedAt = Date.now();
+      try {
+        const engineSearch = deps.openCliSearchByEngine ?? searchWithOpenCli;
+        const engineResults = (await engineSearch(engine, query, openCliEngineLimit(engine, limit))).map((result) => ({
+          ...result,
+          engine
+        }));
+        rows.push(...engineResults);
+        const normalized = engineResults
+          .map((result) => normalizeHeavySearchResult(result, "opencli"))
+          .filter((result): result is HeavySearchResult => Boolean(result));
+        pushSearchTrace(engineDeps, {
+          provider: "opencli",
+          engine,
+          query,
+          status: normalized.length > 0 ? "done" : "empty",
+          results: normalized,
+          durationMs: Date.now() - startedAt
+        });
+      } catch (error) {
+        const message = compactError(error instanceof Error ? error.message : `${engine} search failed`);
+        pushSearchTrace(engineDeps, {
+          provider: "opencli",
+          engine,
+          query,
+          status: "error",
+          results: [],
+          message,
+          durationMs: Date.now() - startedAt
+        });
+        bridgeUnavailable = isOpenCliBridgeError(message);
       }
-    }
+      return { rows, trace: engineTrace, bridgeUnavailable };
+    })
+  );
+
+  const rows: SearchResult[] = [];
+  for (const run of engineRuns) {
+    rows.push(...run.rows);
+    deps.trace?.push(...run.trace);
+  }
+  if (engineRuns.some((run) => run.bridgeUnavailable) && deps.openCliBridgeState) {
+    deps.openCliBridgeState.unavailable = true;
   }
 
   return dedupeSearchResults(

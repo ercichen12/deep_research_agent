@@ -144,11 +144,12 @@ describe("relay/OpenCLI heavy search provider", () => {
       "relay::done",
       "opencli:google:done",
       "opencli:brave:done",
-      "opencli:duckduckgo:done"
+      "opencli:duckduckgo:done",
+      "web:bing:empty"
     ]);
   });
 
-  it("stops repeating OpenCLI engine calls after the browser bridge is unavailable", async () => {
+  it("fans out once, then stops repeating OpenCLI engine calls after the browser bridge is unavailable", async () => {
     const trace: SearchAttemptLog[] = [];
     const calledEngines: string[] = [];
     const provider = createHeavySearchProvider({
@@ -167,10 +168,12 @@ describe("relay/OpenCLI heavy search provider", () => {
     ]);
     await provider.search("OpenAI leadership CEO official site", 10);
 
-    expect(calledEngines).toEqual(["google"]);
+    expect(calledEngines).toEqual(["google", "brave", "duckduckgo"]);
     expect(trace.map((entry) => `${entry.provider}:${entry.engine ?? ""}:${entry.status}`)).toEqual([
       "relay::empty",
       "opencli:google:error",
+      "opencli:brave:error",
+      "opencli:duckduckgo:error",
       "web:bing:done",
       "relay::empty",
       "opencli::error",

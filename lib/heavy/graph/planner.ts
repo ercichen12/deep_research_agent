@@ -2,6 +2,11 @@ import { normalizeResearchActions, type ResearchAction, type ResearchState } fro
 
 export function planGraphActions(state: ResearchState): ResearchAction[] {
   const cycle = state.cycleIndex + 1;
+  const workflowActions = planWorkflowAnalysisActions(state, cycle);
+  if (workflowActions.length) {
+    return workflowActions;
+  }
+
   if (state.candidatePool.some((candidate) => candidate.status === "promoted" || candidate.status === "ranked")) {
     return normalizeResearchActions(
       [
@@ -85,6 +90,54 @@ export function planGraphActions(state: ResearchState): ResearchAction[] {
   );
 }
 
+function planWorkflowAnalysisActions(state: ResearchState, cycle: number): ResearchAction[] {
+  if (!isWorkflowLikeTask(state.frame.taskKind) || state.evidenceItems.length === 0) {
+    return [];
+  }
+
+  const stages = new Set(state.workflowArtifacts.map((artifact) => artifact.stage));
+  if (!stages.has("draft")) {
+    return normalizeResearchActions(
+      [
+        {
+          type: "extract_evidence",
+          purpose: "draft workflow from accumulated evidence",
+          rationale: "A workflow task already has source-grounded evidence, so advance the workflow draft without another search/read cycle."
+        }
+      ],
+      cycle,
+      state.budgets
+    );
+  }
+  if (!stages.has("critique")) {
+    return normalizeResearchActions(
+      [
+        {
+          type: "verify_candidate",
+          purpose: "critique workflow assumptions and unsupported inferences",
+          rationale: "Apodex-style workflow tasks need a critique pass before final recommendations."
+        }
+      ],
+      cycle,
+      state.budgets
+    );
+  }
+  if (!stages.has("revision")) {
+    return normalizeResearchActions(
+      [
+        {
+          type: "compare_candidates",
+          purpose: "revise workflow into ordered gates",
+          rationale: "The workflow has evidence and critique; rebuild it as ordered implementation gates."
+        }
+      ],
+      cycle,
+      state.budgets
+    );
+  }
+  return [];
+}
+
 function filterRepeatedQueries(queries: string[], usedQueries: Set<string>, limit: number): string[] {
   const fresh = queries.filter((query) => !usedQueries.has(query));
   if (fresh.length) {
@@ -162,6 +215,10 @@ function revisionTargetsForTask(taskKind: ResearchState["frame"]["taskKind"]): s
     return ["data model entity resolution workflow", "external validation boundary"];
   }
   return ["official source documentation", "directory database"];
+}
+
+function isWorkflowLikeTask(taskKind: ResearchState["frame"]["taskKind"]): boolean {
+  return taskKind === "data_workflow_design" || taskKind === "sales_strategy" || taskKind === "market_list_building" || taskKind === "technical_verification";
 }
 
 function domainClue(value: string): string {

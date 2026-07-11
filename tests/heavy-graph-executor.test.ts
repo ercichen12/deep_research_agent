@@ -139,6 +139,70 @@ describe("Graph Heavy executor ledger", () => {
       ])
     );
   });
+
+  it("caps workflow reads to keep Apodex-style workflow runs from stalling on too many sources", async () => {
+    const state = createResearchState({
+      inquiryId: "inquiry_exec",
+      turnId: "turn_exec",
+      frame: createResearchFrame("用 HS8542 海关数据做客户分群，要包括清洗、实体合并、同行识别、客户分级、存储架构，以及 EOL/HTF 的外部验证边界。"),
+      budget: { maxSourcesToReadPerCycle: 12, maxTotalSourcesToRead: 12 }
+    });
+    const readUrls: string[] = [];
+    const results = Array.from({ length: 12 }, (_, index) =>
+      result(`HS8542 customs data source ${index}`, `https://trade.example/source-${index}`, "customs data entity resolution customer segmentation", "google")
+    );
+
+    const execution = await executeSearchAction({
+      state,
+      action: action(["HS8542 customs data entity resolution customer segmentation"]),
+      provider: providerWithResults(results, readUrls),
+      storage: { rootDir }
+    });
+
+    expect(readUrls).toHaveLength(6);
+    expect(execution.sources).toHaveLength(6);
+  });
+
+  it("runs independent query searches and source reads concurrently", async () => {
+    const state = createResearchState({
+      inquiryId: "inquiry_exec",
+      turnId: "turn_exec",
+      frame: createResearchFrame("用 HS8542 海关数据做客户分群，要包括清洗、实体合并、同行识别、客户分级、存储架构，以及 EOL/HTF 的外部验证边界。"),
+      budget: { maxSourcesToReadPerCycle: 6, maxTotalSourcesToRead: 6 }
+    });
+    let activeSearches = 0;
+    let maxActiveSearches = 0;
+    let activeReads = 0;
+    let maxActiveReads = 0;
+
+    await executeSearchAction({
+      state,
+      action: action(["HS8542 customs data", "semiconductor shipment entity resolution", "EOL HTF inventory verification"]),
+      provider: {
+        async search(query) {
+          activeSearches += 1;
+          maxActiveSearches = Math.max(maxActiveSearches, activeSearches);
+          await delay(20);
+          activeSearches -= 1;
+          return [
+            result(`${query} source 1`, `https://trade.example/${encodeURIComponent(query)}-1`, "customs data entity resolution", "google"),
+            result(`${query} source 2`, `https://trade.example/${encodeURIComponent(query)}-2`, "customer segmentation lifecycle verification", "brave")
+          ];
+        },
+        async read(resultItem): Promise<HeavySource> {
+          activeReads += 1;
+          maxActiveReads = Math.max(maxActiveReads, activeReads);
+          await delay(20);
+          activeReads -= 1;
+          return { ...resultItem, snippet: resultItem.snippet ?? "", fullText: resultItem.snippet ?? "", readCharCount: resultItem.snippet?.length ?? 0 };
+        }
+      },
+      storage: { rootDir }
+    });
+
+    expect(maxActiveSearches).toBeGreaterThan(1);
+    expect(maxActiveReads).toBeGreaterThan(1);
+  });
 });
 
 function action(queries: string[]): SearchWebAction {
@@ -174,4 +238,8 @@ function result(title: string, url: string, snippet: string, engine: string): He
     provider: "opencli",
     engine
   };
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

@@ -38,15 +38,27 @@ export async function executeSearchAction(input: {
   const providerCalls: SearchBatchArtifact["providerCalls"] = [];
   const allResults: HeavySearchResult[] = [];
 
-  for (const query of input.action.queries) {
-    const results = await input.provider.search(query, input.action.maxResults).catch(() => []);
-    allResults.push(...results);
-    const logs = input.provider.drainSearchLogs?.() ?? [];
-    if (logs.length) {
-      providerCalls.push(...logs.map(toProviderCall));
+  const searchExecutions = await Promise.all(
+    input.action.queries.map(async (query) => {
+      const provider = forkProvider(input.provider);
+      const results = await provider.search(query, input.action.maxResults).catch(() => []);
+      const logs = provider.drainSearchLogs?.() ?? [];
+      return { query, results, logs };
+    })
+  );
+
+  for (const execution of searchExecutions) {
+    allResults.push(...execution.results);
+    if (execution.logs.length) {
+      providerCalls.push(...execution.logs.map(toProviderCall));
     } else {
-      providerCalls.push(...providerCallsFromResults(query, results));
+      providerCalls.push(...providerCallsFromResults(execution.query, execution.results));
     }
+  }
+
+  const parentSearchLogs = input.provider.drainSearchLogs?.() ?? [];
+  if (parentSearchLogs.length) {
+    providerCalls.push(...parentSearchLogs.map(toProviderCall));
   }
 
   const dedupedResults = dedupeResults(allResults);
@@ -76,7 +88,7 @@ export async function executeSearchAction(input: {
 
   const candidateAliases = input.state.candidatePool.flatMap((candidate) => [candidate.name, ...candidate.aliases]);
   const remainingTotalReads = Math.max(0, input.state.budgets.maxTotalSourcesToRead - input.state.budgets.sourcesRead);
-  const readLimit = Math.min(input.state.budgets.maxSourcesToReadPerCycle, remainingTotalReads);
+  const readLimit = Math.min(effectiveReadLimit(input.state), remainingTotalReads);
   const selectedResults = selectSourcesForRead({
     results: dedupedResults,
     expectedSignals: input.action.expectedSignals,
@@ -88,10 +100,10 @@ export async function executeSearchAction(input: {
     await input.callbacks?.onSourceSelected?.(selectedUrls, batch);
   }
 
-  const sources = [];
-  for (const result of selectedResults) {
-    const read = await input.provider.read(result).catch(() => null);
-    const readLogs = input.provider.drainReadLogs?.() ?? [];
+  const sourceRecords = await mapWithConcurrency(selectedResults, readConcurrency(input.state), async (result) => {
+    const provider = forkProvider(input.provider);
+    const read = await provider.read(result).catch(() => null);
+    const readLogs = provider.drainReadLogs?.() ?? [];
     const source = read ?? fallbackSource(result);
     const fullText = source.fullText ?? source.snippet ?? result.snippet ?? "";
     const sourceHash = sourceHashFor(source.url);
@@ -110,7 +122,7 @@ export async function executeSearchAction(input: {
       createdAt: new Date().toISOString()
     };
     await saveSourceArtifact(artifact, input.storage);
-    const sourceRecord = {
+    return {
       summary: {
         sourceHash,
         title: artifact.title,
@@ -125,11 +137,61 @@ export async function executeSearchAction(input: {
       fullText,
       snippet: source.snippet ?? result.snippet ?? ""
     };
+  });
+
+  const sources = [];
+  for (const sourceRecord of sourceRecords) {
     sources.push(sourceRecord);
     await input.callbacks?.onSourceRead?.(sourceRecord, batch);
   }
 
+  const parentReadLogs = input.provider.drainReadLogs?.() ?? [];
+  if (parentReadLogs.length && sources[0]) {
+    sources[0].artifact.readLogs = [...(sources[0].artifact.readLogs ?? []), ...parentReadLogs];
+  }
+
   return { batch, artifact, selectedUrls, sources };
+}
+
+function effectiveReadLimit(state: ResearchState): number {
+  const configured = state.budgets.maxSourcesToReadPerCycle;
+  if (isWorkflowLikeTask(state.frame.taskKind)) {
+    return Math.min(configured, 6);
+  }
+  return configured;
+}
+
+function readConcurrency(state: ResearchState): number {
+  if (isWorkflowLikeTask(state.frame.taskKind)) {
+    return 6;
+  }
+  return 4;
+}
+
+function forkProvider(provider: HeavySearchProvider): HeavySearchProvider {
+  return provider.forkTrace?.() ?? provider;
+}
+
+async function mapWithConcurrency<T, R>(items: T[], concurrency: number, run: (item: T, index: number) => Promise<R>): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let nextIndex = 0;
+  const workerCount = Math.min(Math.max(concurrency, 1), items.length);
+
+  await Promise.all(
+    Array.from({ length: workerCount }, async () => {
+      while (nextIndex < items.length) {
+        const index = nextIndex;
+        nextIndex += 1;
+        results[index] = await run(items[index], index);
+      }
+    })
+  );
+
+  return results;
+}
+
+function isWorkflowLikeTask(taskKind: ResearchState["frame"]["taskKind"]): boolean {
+  return taskKind === "data_workflow_design" || taskKind === "sales_strategy" || taskKind === "market_list_building" || taskKind === "technical_verification";
 }
 
 function toProviderCall(log: SearchAttemptLog): SearchBatchArtifact["providerCalls"][number] {

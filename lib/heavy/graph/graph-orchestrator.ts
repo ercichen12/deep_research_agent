@@ -18,7 +18,6 @@ import { createResearchFrame } from "@/lib/heavy/graph/frame";
 import { planGraphActions } from "@/lib/heavy/graph/planner";
 import {
   createResearchState,
-  normalizeEvidenceExtractionOutput,
   normalizeGraphBudget,
   summarizeGraphState,
   type Candidate,
@@ -228,6 +227,23 @@ async function runSearchStep(
   });
 
   const extracted = extractEvidence({ frame: state.frame, sources: execution.sources });
+  state.evidenceItems = mergeEvidenceItems(state.evidenceItems, extracted.evidenceItems);
+  attachEvidenceToSources(state, extracted.evidenceItems);
+  state.updatedAt = new Date().toISOString();
+  await persistGraphState(inquiry, state, options);
+
+  await appendTurnEvent(
+    {
+      type: "evidence_extracted",
+      inquiryId: state.inquiryId,
+      turnId: state.turnId,
+      cycle: execution.batch.cycle,
+      evidence: extracted.evidenceItems,
+      timestamp: new Date().toISOString()
+    },
+    options
+  );
+
   if (extracted.candidates.length) {
     mergeCandidates(state, extracted.candidates);
     await appendTurnEvent(
@@ -242,128 +258,10 @@ async function runSearchStep(
       options
     );
   }
-  state.evidenceItems = mergeEvidenceItems(state.evidenceItems, extracted.evidenceItems);
   state.queryClues = [...state.queryClues, ...extracted.queryClues].filter((clue, index, array) => array.findIndex((item) => item.id === clue.id) === index);
   state.rejectedPaths = [...state.rejectedPaths, ...extracted.rejectedPaths].filter(
     (path, index, array) => array.findIndex((item) => item.id === path.id) === index
   );
-}
-
-function extractCandidatesAndEvidence(
-  state: ResearchState,
-  sources: Array<{ summary: SourceSummary; fullText: string; snippet: string }>
-) {
-  const corpus = sources.map((source) => `${source.summary.title}\n${source.snippet}\n${source.fullText}`).join("\n\n");
-  if (!/grace brown/i.test(corpus) || !/andromeda robotics/i.test(corpus)) {
-    return normalizeEvidenceExtractionOutput({
-      queryClues: sources.flatMap((source) => [source.summary.title, source.snippet]).filter(Boolean).slice(0, 4).map((text) => ({
-        text,
-        source: "source",
-        weight: 2
-      }))
-    });
-  }
-
-  const candidate: Candidate = {
-    id: "cand_person_company_grace-brown-andromeda-robotics",
-    kind: "person_company",
-    name: "Grace Brown / Andromeda Robotics",
-    aliases: ["Grace Brown", "Andromeda Robotics"],
-    summary: "Grace Brown appears to lead Andromeda Robotics, an Australian robotics AI hardware company.",
-    entities: {
-      person: "Grace Brown",
-      company: "Andromeda Robotics"
-    },
-    matchedConstraints: [],
-    missingConstraints: [],
-    directEvidenceIds: [],
-    proxyEvidenceIds: [],
-    risks: [],
-    score: 0,
-    confidence: "low",
-    status: "active"
-  };
-  const evidenceItems = buildEvidenceItems(state, candidate.id, sources);
-
-  return normalizeEvidenceExtractionOutput({
-    candidates: [candidate],
-    evidenceItems,
-    queryClues: [
-      { text: "Grace Brown Andromeda Robotics CEO AI hardware Australia", source: "candidate", relatedCandidateId: candidate.id, weight: 5 }
-    ]
-  });
-}
-
-function buildEvidenceItems(
-  state: ResearchState,
-  candidateId: string,
-  sources: Array<{ summary: SourceSummary; fullText: string; snippet: string }>
-): EvidenceItem[] {
-  const evidence: EvidenceItem[] = [];
-  const constraints = [...state.frame.hardConstraints, ...state.frame.softPreferences, ...state.frame.exclusionRules];
-
-  for (const source of sources) {
-    const text = `${source.summary.title}\n${source.snippet}\n${source.fullText}`;
-    for (const constraint of constraints) {
-      const match = matchConstraint(constraint.id, text);
-      if (!match) {
-        continue;
-      }
-      evidence.push({
-        id: `ev_${constraint.id}_${source.summary.sourceHash.slice(0, 10)}`,
-        claim: match.claim,
-        subjectIds: [candidateId],
-        constraintIds: [constraint.id],
-        sourceHash: source.summary.sourceHash,
-        sourceUrl: source.summary.url,
-        sourceTitle: source.summary.title,
-        sourceType: source.summary.url.includes("andromedarobotics.example") ? "official" : "news",
-        provider: source.summary.provider,
-        ...(source.summary.engine ? { engine: source.summary.engine } : {}),
-        paraphrase: match.claim,
-        strength: match.strength,
-        confidence: match.strength === "direct" ? "high" : "medium",
-        extractedAt: new Date().toISOString()
-      });
-    }
-  }
-
-  return evidence;
-}
-
-function matchConstraint(constraintId: string, value: string): Pick<EvidenceItem, "claim" | "strength"> | null {
-  const text = value.toLowerCase();
-  if (constraintId === "person_identity" && text.includes("grace brown")) {
-    return { claim: "Grace Brown is named in the source.", strength: "direct" };
-  }
-  if (constraintId === "company_identity" && text.includes("andromeda robotics")) {
-    return { claim: "Andromeda Robotics is named in the source.", strength: "direct" };
-  }
-  if (constraintId === "role" && /\bceo\b|founder|lead/.test(text)) {
-    return { claim: "Grace Brown is described as CEO or company leadership.", strength: "direct" };
-  }
-  if (constraintId === "industry_fit" && /robotics|hardware|ai/.test(text)) {
-    return { claim: "The company is tied to robotics, AI, or hardware.", strength: "direct" };
-  }
-  if (constraintId === "geography" && /australia|australian/.test(text)) {
-    return { claim: "The source connects the candidate to Australia.", strength: "proxy" };
-  }
-  if (constraintId === "ai_public_view" && /\bai\b|artificial intelligence/.test(text)) {
-    return { claim: "The source includes a public AI-related signal.", strength: "proxy" };
-  }
-  if (constraintId === "growth" && /growth|funding|expanded|expansion|raised/.test(text)) {
-    return { claim: "Funding or expansion is proxy evidence for growth.", strength: "proxy" };
-  }
-  if (constraintId === "no_solar" && /solar/.test(text)) {
-    return { claim: "The source indicates solar activity.", strength: "direct" };
-  }
-  if (constraintId === "no_medical" && /medical|medtech|device/.test(text)) {
-    return { claim: "The source indicates medical-device activity.", strength: "direct" };
-  }
-  if (constraintId === "no_heavy" && /heavy manufacturing|heavy industry/.test(text)) {
-    return { claim: "The source indicates heavy-manufacturing activity.", strength: "direct" };
-  }
-  return null;
 }
 
 function refreshCandidateEvidence(state: ResearchState): Candidate[] {
@@ -386,6 +284,31 @@ function mergeEvidenceItems(current: EvidenceItem[], next: EvidenceItem[]): Evid
     byId.set(item.id, item);
   }
   return [...byId.values()];
+}
+
+function attachEvidenceToSources(state: ResearchState, evidenceItems: EvidenceItem[]): void {
+  if (!evidenceItems.length) {
+    return;
+  }
+
+  const evidenceIdsBySource = new Map<string, string[]>();
+  for (const item of evidenceItems) {
+    if (!item.sourceHash) {
+      continue;
+    }
+    evidenceIdsBySource.set(item.sourceHash, [...(evidenceIdsBySource.get(item.sourceHash) ?? []), item.id].filter(unique));
+  }
+
+  state.sourceLedger = state.sourceLedger.map((source) => {
+    const evidenceIds = evidenceIdsBySource.get(source.sourceHash);
+    if (!evidenceIds?.length) {
+      return source;
+    }
+    return {
+      ...source,
+      evidenceIds: [...source.evidenceIds, ...evidenceIds].filter(unique)
+    };
+  });
 }
 
 function createNextWorkflowArtifact(state: ResearchState, cycle: number): WorkflowArtifact | null {
@@ -504,6 +427,7 @@ async function completeInquiry(inquiry: Inquiry, state: ResearchState, options: 
   inquiry.graphState = summarizeGraphState(state);
 
   await persistGraphState(inquiry, state, options);
+  await appendTurnEvent({ type: "ranking_completed", inquiryId: state.inquiryId, turnId: state.turnId, candidates: state.candidatePool, timestamp: completedAt }, options);
   await appendTurnEvent({ type: "graph_final_reported", inquiryId: state.inquiryId, turnId: state.turnId, report, timestamp: completedAt }, options);
   await appendTurnEvent({ type: "turn_completed", inquiryId: state.inquiryId, turnId: state.turnId, timestamp: completedAt }, options);
 }
@@ -533,30 +457,4 @@ async function persistGraphState(inquiry: Inquiry, state: ResearchState, options
   inquiry.graphState = summarizeGraphState(state);
   await saveGraphState(state, options);
   await saveInquiry(inquiry, options);
-}
-
-function createFinalReport(state: ResearchState, completedAt: string): FinalReport {
-  const ranked = [...state.candidatePool].sort((left, right) => right.score - left.score);
-  const best = ranked[0];
-  const sourceUrls = [...new Set(state.sourceLedger.map((source) => source.url))];
-  const unknowns = best?.missingConstraints.map((constraint) => constraint.constraintId) ?? state.frame.hardConstraints.map((constraint) => constraint.id);
-
-  return {
-    markdown: best
-      ? [
-          `# ${best.name}`,
-          "",
-          best.summary,
-          "",
-          `Score: ${best.score} (${best.confidence} confidence).`,
-          "",
-          "## Evidence",
-          ...best.matchedConstraints.map((constraint) => `- ${constraint.constraintId}: ${constraint.status}`)
-        ].join("\n")
-      : "# No supported candidate\n\n证据不足，无法确认候选人。",
-    summary: best ? `${best.name} is the strongest evidence-backed candidate.` : "证据不足，无法确认候选人。",
-    sourceUrls,
-    unknowns,
-    completedAt
-  };
 }
